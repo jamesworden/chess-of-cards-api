@@ -41,7 +41,7 @@ jobs:
     if: github.ref == 'refs/heads/develop' # Conditional execution
 
     # Links to the 'development' environment (requires you to create this environment in GitHub settings)
-    environment: development
+    environment: dev
 
     steps:
       - name: Download Build Artifacts
@@ -63,7 +63,7 @@ jobs:
           sam deploy \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
-            --stack-name ChessOfCardsApi-Development \
+            --stack-name ChessOfCardsApi-Dev \
             --s3-bucket chess-of-cards-api-artifacts \
             --capabilities CAPABILITY_IAM
 
@@ -96,6 +96,6 @@ jobs:
           sam deploy \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
-            --stack-name ChessOfCardsApi-Production \
+            --stack-name ChessOfCardsApi-Prod \
             --s3-bucket chess-of-cards-api-artifacts \
             --capabilities CAPABILITY_IAM
