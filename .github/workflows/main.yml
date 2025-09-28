@@ -25,7 +25,8 @@ jobs:
         run: pip install aws-sam-cli
 
       - name: SAM Build
-        run: sam build --use-container
+        # FIX APPLIED: Added '--mount-with WRITE' to prevent the interactive prompt error in CI
+        run: sam build --use-container --mount-with WRITE
 
       # Upload the built artifacts so they can be used by the deploy jobs
       - name: Upload Artifacts
@@ -40,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop' # Conditional execution
 
-    # Links to the 'development' environment (requires you to create this environment in GitHub settings)
+    # Links to the 'dev' environment
     environment: dev
 
     steps:
@@ -53,10 +54,10 @@ jobs:
       - name: Configure AWS Credentials (Dev)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          # Assumes you have Dev keys configured as secrets in the 'development' environment
+          # Assumes you have Dev keys configured as secrets in the 'dev' environment
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Use your target AWS region
+          aws-region: us-east-1 # <-- ACTION NEEDED: Confirm this is your target AWS region
 
       - name: SAM Deploy to Development
         run: |
@@ -74,7 +75,7 @@ jobs:
     if: github.ref == 'refs/heads/main' # Conditional execution
 
     # CRITICAL: Links to the 'production' environment (with all its required security gates)
-    environment: production
+    environment: prod
 
     steps:
       - name: Download Build Artifacts
@@ -89,7 +90,7 @@ jobs:
           # Assumes you have Prod keys configured as secrets in the 'production' environment
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: us-east-1 # <-- ACTION NEEDED: Confirm this is your target AWS region
 
       - name: SAM Deploy to Production
         run: |
