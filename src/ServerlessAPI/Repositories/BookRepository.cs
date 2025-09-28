@@ -19,9 +19,9 @@ public class BookRepository : IBookRepository
     {
         try
         {
-            book.Id = Guid.NewGuid();
+            book.GameId = Guid.NewGuid();
             await context.SaveAsync(book);
-            logger.LogInformation("Book {} is added", book.Id);
+            logger.LogInformation("Book {} is added", book.GameId);
         }
         catch (Exception ex)
         {
@@ -38,9 +38,9 @@ public class BookRepository : IBookRepository
         try
         {
             // Delete the book.
-            await context.DeleteAsync<Book>(book.Id);
+            await context.DeleteAsync<Book>(book.GameId);
             // Try to retrieve deleted book. It should return null.
-            Book deletedBook = await context.LoadAsync<Book>(book.Id, new DynamoDBContextConfig
+            Book deletedBook = await context.LoadAsync<Book>(book.GameId, new DynamoDBContextConfig
             {
                 ConsistentRead = true
             });

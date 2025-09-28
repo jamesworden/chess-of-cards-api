@@ -53,7 +53,7 @@ public class BooksController : ControllerBase
         {
             return CreatedAtAction(
                 nameof(Get),
-                new { id = book.Id },
+                new { id = book.GameId },
                 book);
         }
         else
@@ -78,7 +78,7 @@ public class BooksController : ControllerBase
             return NotFound(errorMsg);
         }
 
-        book.Id = bookRetrieved.Id;
+        book.GameId = bookRetrieved.GameId;
 
         await bookRepository.UpdateAsync(book);
         return Ok();

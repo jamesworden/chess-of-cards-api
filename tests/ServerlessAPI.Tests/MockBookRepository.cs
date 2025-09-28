@@ -17,7 +17,7 @@ internal class MockBookRepository : IBookRepository
         fakeEntity = new Faker<Book>()
         .RuleFor(o => o.Authors, f => { return new List<string>() { f.Name.FullName(), f.Name.FullName() }; })
         .RuleFor(o => o.CoverPage, f => f.Image.LoremPixelUrl())
-        .RuleFor(o => o.Id, f => Guid.NewGuid());
+        .RuleFor(o => o.GameId, f => Guid.NewGuid());
     }
 
     public Task<bool> CreateAsync(Book book)
@@ -39,7 +39,7 @@ internal class MockBookRepository : IBookRepository
 
     public Task<Book?> GetByIdAsync(Guid id)
     {
-        _ = fakeEntity.RuleFor(o => o.Id, f => id);
+        _ = fakeEntity.RuleFor(o => o.GameId, f => id);
         var book = fakeEntity.Generate() ?? null;
 
         return Task.FromResult(book);

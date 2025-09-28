@@ -6,7 +6,7 @@ namespace ServerlessAPI.Entities;
 /// Map the Book Class to DynamoDb Table
 /// To learn more visit https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DeclarativeTagsList.html
 /// </summary>
-[DynamoDBTable("chess-of-cards-apiBookCatalog")]
+[DynamoDBTable("chess-of-cards-api-game")]
 public class Book
 {
     ///<summary>
@@ -14,7 +14,7 @@ public class Book
     /// to learn more visit https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/MidLevelAPILimitations.SupportedTypes.html
     /// <summary>
     [DynamoDBHashKey] //Partition key
-    public Guid Id { get; set; } = Guid.Empty;
+    public Guid GameId { get; set; } = Guid.Empty;
 
     [DynamoDBProperty]
     public string Title { get; set; } = string.Empty;

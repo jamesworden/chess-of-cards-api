@@ -1,7 +1,17 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   Sample SAM Template for chess-of-cards-api
+
+# 1. New Parameter for Environment
+Parameters:
+  Environment:
+    Type: String
+    Default: dev # Set a default for convenience
+    AllowedValues:
+      - dev
+      - prod
+    Description: Environment name (e.g., dev or prod)
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -15,7 +25,7 @@ Resources:
   NetCodeWebAPIServerless:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      Description: A simple example includes a .NET Core WebAPI App with 
+      Description: A simple example includes a .NET Core WebAPI App with
         DynamoDB table.
       CodeUri: ./src/ServerlessAPI/
       Handler: ServerlessAPI
@@ -23,32 +33,36 @@ Resources:
       MemorySize: 1024
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
+          # Pass the DynamoDB Table Name (which will now be environment specific)
           SAMPLE_TABLE: !Ref SampleTable
+          # Optionally pass the environment name itself
+          ENVIRONMENT_NAME: !Ref Environment
       Policies:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
-      - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SampleTable
       Events:
         ProxyResource:
           Type: HttpApi
           Properties:
-            PayloadFormatVersion: '2.0'
+            PayloadFormatVersion: "2.0"
             Path: /{proxy+}
             Method: ANY
         RootResource:
-          PayloadFormatVersion: '2.0'
+          PayloadFormatVersion: "2.0"
           Type: HttpApi
           Properties:
             Path: /
             Method: ANY
 
-  # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
+  # DynamoDB table to store item: {id: <ID>, name: <NAME>}
   SampleTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
-      TableName: chess-of-cards-apiBookCatalog
+      # 2. Update the TableName to include the Environment parameter
+      TableName: !Sub "chess-of-cards-api-game-${Environment}"
       PrimaryKey:
-        Name: Id
+        Name: GameId
         Type: String
       ProvisionedThroughput:
         ReadCapacityUnits: 2
@@ -58,7 +72,8 @@ Resources:
     Type: AWS::ResourceGroups::Group
     Properties:
       Name:
-        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+        # 3. Update ApplicationInsights name to include the Environment parameter
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}-${Environment}
       ResourceQuery:
         Type: CLOUDFORMATION_STACK_1_0
   ApplicationInsightsMonitoring:
@@ -66,7 +81,8 @@ Resources:
     Properties:
       ResourceGroupName:
         Ref: ApplicationResourceGroup
-      AutoConfigurationEnabled: 'true'
+      AutoConfigurationEnabled: "true"
+
 Outputs:
   WebEndpoint:
     Description: API Gateway endpoint URL
