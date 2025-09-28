@@ -34,13 +34,13 @@ Resources:
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
           # Pass the DynamoDB Table Name (which will now be environment specific)
-          SAMPLE_TABLE: !Ref SampleTable
+          SAMPLE_TABLE: !Ref GameTable
           # Optionally pass the environment name itself
           ENVIRONMENT_NAME: !Ref Environment
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
+        # Give Create/Read/Update/Delete Permissions to the GameTable
         - DynamoDBCrudPolicy:
-            TableName: !Ref SampleTable
+            TableName: !Ref GameTable
       Events:
         ProxyResource:
           Type: HttpApi
@@ -56,8 +56,8 @@ Resources:
             Method: ANY
 
   # DynamoDB table to store item: {id: <ID>, name: <NAME>}
-  SampleTable:
-    Type: AWS::Serverless::SimpleTable
+  GameTable:
+    Type: AWS::Serverless::GameTable
     Properties:
       # 2. Update the TableName to include the Environment parameter
       TableName: !Sub "chess-of-cards-api-game-${Environment}"
