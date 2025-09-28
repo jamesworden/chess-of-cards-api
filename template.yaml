@@ -57,7 +57,7 @@ Resources:
 
   # DynamoDB table to store item: {id: <ID>, name: <NAME>}
   GameTable:
-    Type: AWS::Serverless::GameTable
+    Type: AWS::Serverless::SimpleTable
     Properties:
       # 2. Update the TableName to include the Environment parameter
       TableName: !Sub "chess-of-cards-api-game-${Environment}"
