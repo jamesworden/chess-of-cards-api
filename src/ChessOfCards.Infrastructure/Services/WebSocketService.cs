@@ -32,7 +32,7 @@ public class WebSocketService
     /// <summary>
     /// Send a message to a specific connection
     /// </summary>
-    public async Task<bool> SendMessageAsync(string connectionId, object message)
+    public virtual async Task<bool> SendMessageAsync(string connectionId, object message)
     {
         try
         {
@@ -64,7 +64,7 @@ public class WebSocketService
     /// <summary>
     /// Send a message to multiple connections
     /// </summary>
-    public async Task<Dictionary<string, bool>> SendMessageToMultipleAsync(
+    public virtual async Task<Dictionary<string, bool>> SendMessageToMultipleAsync(
         IEnumerable<string> connectionIds,
         object message
     )
@@ -88,7 +88,7 @@ public class WebSocketService
     /// <summary>
     /// Check if a connection is still active
     /// </summary>
-    public async Task<bool> IsConnectionActiveAsync(string connectionId)
+    public virtual async Task<bool> IsConnectionActiveAsync(string connectionId)
     {
         try
         {
@@ -109,7 +109,7 @@ public class WebSocketService
     /// <summary>
     /// Disconnect a connection
     /// </summary>
-    public async Task<bool> DisconnectAsync(string connectionId)
+    public virtual async Task<bool> DisconnectAsync(string connectionId)
     {
         try
         {

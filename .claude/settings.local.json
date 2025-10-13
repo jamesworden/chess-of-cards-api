@@ -13,7 +13,8 @@
       "Bash(dotnet csharpier:*)",
       "Bash(mkdir:*)",
       "Bash(rm:*)",
-      "Bash(dotnet add:*)"
+      "Bash(dotnet add:*)",
+      "Bash(dotnet test:*)"
     ],
     "deny": [],
     "ask": []
