@@ -43,6 +43,38 @@ public class ActionDispatcher
                 await HandleDeletePendingGameAsync(connectionId);
                 break;
 
+            case "makeMove":
+                await HandleMakeMoveAsync(connectionId, data);
+                break;
+
+            case "passMove":
+                await HandlePassMoveAsync(connectionId);
+                break;
+
+            case "resignGame":
+                await HandleResignGameAsync(connectionId);
+                break;
+
+            case "rearrangeHand":
+                await HandleRearrangeHandAsync(connectionId, data);
+                break;
+
+            case "offerDraw":
+                await HandleOfferDrawAsync(connectionId);
+                break;
+
+            case "acceptDrawOffer":
+                await HandleAcceptDrawOfferAsync(connectionId);
+                break;
+
+            case "sendChatMessage":
+                await HandleSendChatMessageAsync(connectionId, data);
+                break;
+
+            case "markLatestReadChatMessage":
+                await HandleMarkLatestReadChatMessageAsync(connectionId, data);
+                break;
+
             default:
                 await HandleUnknownActionAsync(connectionId, action, context);
                 break;
@@ -98,6 +130,82 @@ public class ActionDispatcher
         await _mediator.Send(
             new Application.Features.Games.Commands.DeletePendingGameCommand(connectionId)
         );
+    }
+
+    private async Task HandleMakeMoveAsync(string connectionId, object? data)
+    {
+        var request = JsonSerializationHelper.DeserializeData<MakeMoveRequest>(data);
+        if (request == null)
+        {
+            await SendErrorAsync(connectionId, "Invalid request data");
+            return;
+        }
+
+        await _mediator.Publish(request.ToCommand(connectionId));
+    }
+
+    private async Task HandlePassMoveAsync(string connectionId)
+    {
+        await _mediator.Send(new Application.Features.Games.Commands.PassMoveCommand(connectionId));
+    }
+
+    private async Task HandleResignGameAsync(string connectionId)
+    {
+        await _mediator.Publish(
+            new Application.Features.Games.Commands.ResignGameCommand(connectionId)
+        );
+    }
+
+    private async Task HandleRearrangeHandAsync(string connectionId, object? data)
+    {
+        var request = JsonSerializationHelper.DeserializeData<RearrangeHandRequest>(data);
+        if (request == null)
+        {
+            await SendErrorAsync(connectionId, "Invalid request data");
+            return;
+        }
+
+        await _mediator.Publish(request.ToCommand(connectionId));
+    }
+
+    private async Task HandleOfferDrawAsync(string connectionId)
+    {
+        await _mediator.Publish(
+            new Application.Features.Games.Commands.OfferDrawCommand(connectionId)
+        );
+    }
+
+    private async Task HandleAcceptDrawOfferAsync(string connectionId)
+    {
+        await _mediator.Publish(
+            new Application.Features.Games.Commands.AcceptDrawOfferCommand(connectionId)
+        );
+    }
+
+    private async Task HandleSendChatMessageAsync(string connectionId, object? data)
+    {
+        var request = JsonSerializationHelper.DeserializeData<SendChatMessageRequest>(data);
+        if (request == null)
+        {
+            await SendErrorAsync(connectionId, "Invalid request data");
+            return;
+        }
+
+        await _mediator.Publish(request.ToCommand(connectionId));
+    }
+
+    private async Task HandleMarkLatestReadChatMessageAsync(string connectionId, object? data)
+    {
+        var request = JsonSerializationHelper.DeserializeData<MarkLatestReadChatMessageRequest>(
+            data
+        );
+        if (request == null)
+        {
+            await SendErrorAsync(connectionId, "Invalid request data");
+            return;
+        }
+
+        await _mediator.Publish(request.ToCommand(connectionId));
     }
 
     private async Task HandleUnknownActionAsync(

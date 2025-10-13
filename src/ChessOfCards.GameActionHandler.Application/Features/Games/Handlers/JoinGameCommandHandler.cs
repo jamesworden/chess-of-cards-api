@@ -68,7 +68,26 @@ public class JoinGameCommandHandler(
 
             _logger.LogInformation($"Starting game {pendingGame.GameCode}");
 
-            // Create active game (simplified - full game logic will be added later)
+            // Parse duration option from string to enum
+            var durationOption = Enum.Parse<Domain.Features.Games.DurationOption>(
+                pendingGame.DurationOption,
+                ignoreCase: true
+            );
+
+            // Create new Game domain object
+            var game = new Domain.Features.Games.Game(
+                pendingGame.HostConnectionId,
+                command.ConnectionId,
+                pendingGame.GameCode,
+                durationOption,
+                pendingGame.HostName,
+                command.GuestName
+            );
+
+            // Serialize game state to JSON
+            var gameStateJson = System.Text.Json.JsonSerializer.Serialize(game);
+
+            // Create active game record
             var activeGame = new ActiveGameRecord(
                 pendingGame.GameCode,
                 pendingGame.HostConnectionId,
@@ -76,7 +95,7 @@ public class JoinGameCommandHandler(
                 pendingGame.DurationOption,
                 pendingGame.HostName,
                 command.GuestName,
-                "{}" // Empty game state for now - will implement game initialization
+                gameStateJson
             );
 
             await _activeGameRepository.CreateAsync(activeGame);
@@ -98,24 +117,29 @@ public class JoinGameCommandHandler(
 
             _logger.LogInformation($"Game {pendingGame.GameCode} started");
 
-            // Notify both players
-            var gameStartedMessage = new WebSocketMessage(
+            // TODO: Start game timer when timer service is implemented
+            var hostSecondsElapsed = 0.0;
+            var guestSecondsElapsed = 0.0;
+
+            // Notify both players with full game state views
+            var hostView = game.ToHostPlayerView(hostSecondsElapsed, guestSecondsElapsed);
+            var guestView = game.ToGuestPlayerView(hostSecondsElapsed, guestSecondsElapsed);
+
+            var hostGameStartedMessage = new WebSocketMessage(
                 MessageTypes.GameStarted,
-                new
-                {
-                    gameCode = activeGame.GameCode,
-                    hostName = activeGame.HostName,
-                    guestName = activeGame.GuestName,
-                    durationOption = activeGame.DurationOption,
-                    isHostPlayersTurn = activeGame.IsHostPlayersTurn,
-                }
+                new { gameView = hostView }
+            );
+
+            var guestGameStartedMessage = new WebSocketMessage(
+                MessageTypes.GameStarted,
+                new { gameView = guestView }
             );
 
             await _webSocketService.SendMessageAsync(
                 pendingGame.HostConnectionId,
-                gameStartedMessage
+                hostGameStartedMessage
             );
-            await _webSocketService.SendMessageAsync(command.ConnectionId, gameStartedMessage);
+            await _webSocketService.SendMessageAsync(command.ConnectionId, guestGameStartedMessage);
         }
         catch (Exception ex)
         {

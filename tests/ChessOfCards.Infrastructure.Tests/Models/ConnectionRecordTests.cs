@@ -140,7 +140,7 @@ public class ConnectionRecordTests
         var record = new ConnectionRecord(connectionId, playerName)
         {
             GameCode = "ABC123",
-            PlayerRole = "HOST"
+            PlayerRole = "HOST",
         };
 
         // Assert
@@ -202,10 +202,7 @@ public class ConnectionRecordTests
     public void ConnectionRecord_CanClearGameCode()
     {
         // Arrange
-        var record = new ConnectionRecord("conn-clear-test")
-        {
-            GameCode = "CLEAR123"
-        };
+        var record = new ConnectionRecord("conn-clear-test") { GameCode = "CLEAR123" };
 
         // Act
         record.GameCode = null;
@@ -218,10 +215,7 @@ public class ConnectionRecordTests
     public void ConnectionRecord_CanClearPlayerRole()
     {
         // Arrange
-        var record = new ConnectionRecord("conn-clear-role")
-        {
-            PlayerRole = "HOST"
-        };
+        var record = new ConnectionRecord("conn-clear-role") { PlayerRole = "HOST" };
 
         // Act
         record.PlayerRole = null;

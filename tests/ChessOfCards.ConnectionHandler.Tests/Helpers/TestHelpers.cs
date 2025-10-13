@@ -17,8 +17,8 @@ public static class TestHelpers
                 ConnectionId = connectionId,
                 ApiId = "test-api-id",
                 Stage = "dev",
-                RequestId = Guid.NewGuid().ToString()
-            }
+                RequestId = Guid.NewGuid().ToString(),
+            },
         };
     }
 
@@ -32,8 +32,8 @@ public static class TestHelpers
                 ConnectionId = connectionId,
                 ApiId = "test-api-id",
                 Stage = "dev",
-                RequestId = Guid.NewGuid().ToString()
-            }
+                RequestId = Guid.NewGuid().ToString(),
+            },
         };
     }
 }

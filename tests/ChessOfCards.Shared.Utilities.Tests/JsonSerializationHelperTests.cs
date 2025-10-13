@@ -13,7 +13,7 @@ public class JsonSerializationHelperTests
         {
             Name = "John Doe",
             Age = 30,
-            Email = "john@example.com"
+            Email = "john@example.com",
         };
 
         // Act
@@ -63,8 +63,8 @@ public class JsonSerializationHelperTests
             {
                 Street = "123 Main St",
                 City = "Springfield",
-                ZipCode = "12345"
-            }
+                ZipCode = "12345",
+            },
         };
 
         // Act
@@ -87,7 +87,7 @@ public class JsonSerializationHelperTests
         {
             new { Name = "Alice", Age = 25 },
             new { Name = "Bob", Age = 30 },
-            new { Name = "Charlie", Age = 35 }
+            new { Name = "Charlie", Age = 35 },
         };
 
         // Act
@@ -112,11 +112,13 @@ public class JsonSerializationHelperTests
         {
             { "player1", "Alice" },
             { "player2", "Bob" },
-            { "player3", "Charlie" }
+            { "player3", "Charlie" },
         };
 
         // Act
-        var result = JsonSerializationHelper.DeserializeData<Dictionary<string, string>>(sourceData);
+        var result = JsonSerializationHelper.DeserializeData<Dictionary<string, string>>(
+            sourceData
+        );
 
         // Assert
         Assert.NotNull(result);
@@ -171,12 +173,12 @@ public class JsonSerializationHelperTests
     {
         // Arrange
         var json = """
-        {
-            "Name": "Test User",
-            "Age": 40,
-            "Email": "test@example.com"
-        }
-        """;
+            {
+                "Name": "Test User",
+                "Age": 40,
+                "Email": "test@example.com"
+            }
+            """;
         var jsonElement = JsonSerializer.Deserialize<JsonElement>(json);
 
         // Act
@@ -196,7 +198,7 @@ public class JsonSerializationHelperTests
         var sourceData = new
         {
             Name = "Partial User",
-            ExtraField = "This field doesn't exist in TestPerson"
+            ExtraField = "This field doesn't exist in TestPerson",
         };
 
         // Act
@@ -217,7 +219,7 @@ public class JsonSerializationHelperTests
         {
             name = "Case Test",
             age = 28,
-            EMAIL = "case@test.com"
+            EMAIL = "case@test.com",
         };
 
         // Act
@@ -241,7 +243,7 @@ public class JsonSerializationHelperTests
             HostConnectionId = "host-conn-123",
             GuestConnectionId = "guest-conn-456",
             CurrentTurn = "HOST",
-            MoveCount = 5
+            MoveCount = 5,
         };
 
         // Act
@@ -261,11 +263,7 @@ public class JsonSerializationHelperTests
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var sourceData = new
-        {
-            EventName = "Game Started",
-            Timestamp = now
-        };
+        var sourceData = new { EventName = "Game Started", Timestamp = now };
 
         // Act
         var result = JsonSerializationHelper.DeserializeData<TestEvent>(sourceData);

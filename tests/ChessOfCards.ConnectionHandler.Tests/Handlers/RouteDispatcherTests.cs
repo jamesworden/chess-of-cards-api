@@ -24,7 +24,9 @@ public class RouteDispatcherTests
         _mockConnectionRepo = new Mock<IConnectionRepository>();
         _mockGameRepo = new Mock<IActiveGameRepository>();
         _mockTimerRepo = new Mock<IGameTimerRepository>();
-        _mockWebSocketService = new Mock<WebSocketService>("wss://test.execute-api.us-east-1.amazonaws.com/dev");
+        _mockWebSocketService = new Mock<WebSocketService>(
+            "wss://test.execute-api.us-east-1.amazonaws.com/dev"
+        );
 
         // Setup default behavior for SendMessageAsync to return true
         _mockWebSocketService
@@ -75,9 +77,7 @@ public class RouteDispatcherTests
             .Setup(r => r.GetByConnectionIdAsync(connectionId))
             .ReturnsAsync(new ConnectionRecord(connectionId));
 
-        _mockConnectionRepo
-            .Setup(r => r.DeleteAsync(connectionId))
-            .ReturnsAsync(true);
+        _mockConnectionRepo.Setup(r => r.DeleteAsync(connectionId)).ReturnsAsync(true);
 
         // Act
         var response = await _dispatcher.DispatchAsync("$disconnect", request, _context);
@@ -117,12 +117,12 @@ public class RouteDispatcherTests
         // Assert
         Assert.Equal(200, response.StatusCode);
         _mockConnectionRepo.Verify(
-            r => r.CreateAsync(
-                It.Is<ConnectionRecord>(c =>
-                    c.ConnectionId == connectionId &&
-                    c.GameCode == null
-                )
-            ),
+            r =>
+                r.CreateAsync(
+                    It.Is<ConnectionRecord>(c =>
+                        c.ConnectionId == connectionId && c.GameCode == null
+                    )
+                ),
             Times.Once
         );
     }
@@ -179,9 +179,7 @@ public class RouteDispatcherTests
             .Setup(r => r.GetByConnectionIdAsync(connectionId))
             .ReturnsAsync(connection);
 
-        _mockConnectionRepo
-            .Setup(r => r.DeleteAsync(connectionId))
-            .ReturnsAsync(true);
+        _mockConnectionRepo.Setup(r => r.DeleteAsync(connectionId)).ReturnsAsync(true);
 
         // Act
         var response = await _dispatcher.DispatchAsync("$disconnect", request, _context);
@@ -200,26 +198,21 @@ public class RouteDispatcherTests
         var gameCode = "GAME123";
         var request = TestHelpers.CreateDisconnectRequest(connectionId);
 
-        var connection = new ConnectionRecord(connectionId)
-        {
-            GameCode = gameCode
-        };
+        var connection = new ConnectionRecord(connectionId) { GameCode = gameCode };
 
         var game = new ActiveGameRecord
         {
             GameCode = gameCode,
             HostConnectionId = connectionId,
             GuestConnectionId = "guest-connection",
-            HasEnded = false
+            HasEnded = false,
         };
 
         _mockConnectionRepo
             .Setup(r => r.GetByConnectionIdAsync(connectionId))
             .ReturnsAsync(connection);
 
-        _mockGameRepo
-            .Setup(r => r.GetByGameCodeAsync(gameCode))
-            .ReturnsAsync(game);
+        _mockGameRepo.Setup(r => r.GetByGameCodeAsync(gameCode)).ReturnsAsync(game);
 
         _mockGameRepo
             .Setup(r => r.UpdateAsync(It.IsAny<ActiveGameRecord>()))
@@ -229,9 +222,7 @@ public class RouteDispatcherTests
             .Setup(r => r.CreateAsync(It.IsAny<GameTimerRecord>()))
             .ReturnsAsync((GameTimerRecord t) => t);
 
-        _mockConnectionRepo
-            .Setup(r => r.DeleteAsync(connectionId))
-            .ReturnsAsync(true);
+        _mockConnectionRepo.Setup(r => r.DeleteAsync(connectionId)).ReturnsAsync(true);
 
         // Act
         var response = await _dispatcher.DispatchAsync("$disconnect", request, _context);
@@ -257,30 +248,23 @@ public class RouteDispatcherTests
         var gameCode = "ENDED123";
         var request = TestHelpers.CreateDisconnectRequest(connectionId);
 
-        var connection = new ConnectionRecord(connectionId)
-        {
-            GameCode = gameCode
-        };
+        var connection = new ConnectionRecord(connectionId) { GameCode = gameCode };
 
         var game = new ActiveGameRecord
         {
             GameCode = gameCode,
             HostConnectionId = connectionId,
             GuestConnectionId = "guest-connection",
-            HasEnded = true
+            HasEnded = true,
         };
 
         _mockConnectionRepo
             .Setup(r => r.GetByConnectionIdAsync(connectionId))
             .ReturnsAsync(connection);
 
-        _mockGameRepo
-            .Setup(r => r.GetByGameCodeAsync(gameCode))
-            .ReturnsAsync(game);
+        _mockGameRepo.Setup(r => r.GetByGameCodeAsync(gameCode)).ReturnsAsync(game);
 
-        _mockConnectionRepo
-            .Setup(r => r.DeleteAsync(connectionId))
-            .ReturnsAsync(true);
+        _mockConnectionRepo.Setup(r => r.DeleteAsync(connectionId)).ReturnsAsync(true);
 
         // Act
         var response = await _dispatcher.DispatchAsync("$disconnect", request, _context);
@@ -340,26 +324,21 @@ public class RouteDispatcherTests
         var gameCode = "GAME456";
         var request = TestHelpers.CreateDisconnectRequest(guestConnectionId);
 
-        var connection = new ConnectionRecord(guestConnectionId)
-        {
-            GameCode = gameCode
-        };
+        var connection = new ConnectionRecord(guestConnectionId) { GameCode = gameCode };
 
         var game = new ActiveGameRecord
         {
             GameCode = gameCode,
             HostConnectionId = "host-connection",
             GuestConnectionId = guestConnectionId,
-            HasEnded = false
+            HasEnded = false,
         };
 
         _mockConnectionRepo
             .Setup(r => r.GetByConnectionIdAsync(guestConnectionId))
             .ReturnsAsync(connection);
 
-        _mockGameRepo
-            .Setup(r => r.GetByGameCodeAsync(gameCode))
-            .ReturnsAsync(game);
+        _mockGameRepo.Setup(r => r.GetByGameCodeAsync(gameCode)).ReturnsAsync(game);
 
         _mockGameRepo
             .Setup(r => r.UpdateAsync(It.IsAny<ActiveGameRecord>()))
@@ -369,9 +348,7 @@ public class RouteDispatcherTests
             .Setup(r => r.CreateAsync(It.IsAny<GameTimerRecord>()))
             .ReturnsAsync((GameTimerRecord t) => t);
 
-        _mockConnectionRepo
-            .Setup(r => r.DeleteAsync(guestConnectionId))
-            .ReturnsAsync(true);
+        _mockConnectionRepo.Setup(r => r.DeleteAsync(guestConnectionId)).ReturnsAsync(true);
 
         // Act
         var response = await _dispatcher.DispatchAsync("$disconnect", request, _context);

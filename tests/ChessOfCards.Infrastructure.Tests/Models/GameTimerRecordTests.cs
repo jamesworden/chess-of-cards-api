@@ -28,8 +28,16 @@ public class GameTimerRecordTests
 
         // Verify timestamps are within reasonable range
         Assert.InRange(timer.StartedAt, beforeCreation, afterCreation);
-        Assert.InRange(timer.ExpiresAt, beforeCreation + (long)totalSeconds, afterCreation + (long)totalSeconds);
-        Assert.InRange(timer.Ttl, beforeCreation + (long)totalSeconds + 3600, afterCreation + (long)totalSeconds + 3600);
+        Assert.InRange(
+            timer.ExpiresAt,
+            beforeCreation + (long)totalSeconds,
+            afterCreation + (long)totalSeconds
+        );
+        Assert.InRange(
+            timer.Ttl,
+            beforeCreation + (long)totalSeconds + 3600,
+            afterCreation + (long)totalSeconds + 3600
+        );
     }
 
     [Fact]
@@ -110,8 +118,16 @@ public class GameTimerRecordTests
 
         // Verify timestamps
         Assert.InRange(timer.StartedAt, beforeCreation, afterCreation);
-        Assert.InRange(timer.ExpiresAt, beforeCreation + (long)gracePeriod, afterCreation + (long)gracePeriod);
-        Assert.InRange(timer.Ttl, beforeCreation + (long)gracePeriod + 600, afterCreation + (long)gracePeriod + 600);
+        Assert.InRange(
+            timer.ExpiresAt,
+            beforeCreation + (long)gracePeriod,
+            afterCreation + (long)gracePeriod
+        );
+        Assert.InRange(
+            timer.Ttl,
+            beforeCreation + (long)gracePeriod + 600,
+            afterCreation + (long)gracePeriod + 600
+        );
     }
 
     [Fact]

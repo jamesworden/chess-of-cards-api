@@ -12,4 +12,7 @@
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.3" />
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ChessOfCards.Domain\ChessOfCards.Domain.csproj" />
+  </ItemGroup>
 </Project>

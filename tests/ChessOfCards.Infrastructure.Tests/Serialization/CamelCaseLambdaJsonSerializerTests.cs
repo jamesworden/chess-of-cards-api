@@ -21,7 +21,7 @@ public class CamelCaseLambdaJsonSerializerTests
         {
             GameCode = "ABC123",
             PlayerName = "Alice",
-            TotalScore = 100
+            TotalScore = 100,
         };
 
         using var stream = new MemoryStream();
@@ -45,12 +45,12 @@ public class CamelCaseLambdaJsonSerializerTests
     {
         // Arrange
         var json = """
-        {
-            "gameCode": "XYZ789",
-            "playerName": "Bob",
-            "totalScore": 250
-        }
-        """;
+            {
+                "gameCode": "XYZ789",
+                "playerName": "Bob",
+                "totalScore": 250
+            }
+            """;
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act
@@ -68,12 +68,12 @@ public class CamelCaseLambdaJsonSerializerTests
     {
         // Arrange - serializer is case-insensitive
         var json = """
-        {
-            "GameCode": "TEST123",
-            "PlayerName": "Charlie",
-            "TotalScore": 500
-        }
-        """;
+            {
+                "GameCode": "TEST123",
+                "PlayerName": "Charlie",
+                "TotalScore": 500
+            }
+            """;
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act
@@ -94,7 +94,7 @@ public class CamelCaseLambdaJsonSerializerTests
         {
             GameCode = "ABC123",
             PlayerName = null, // This should be omitted
-            TotalScore = 100
+            TotalScore = 100,
         };
 
         using var stream = new MemoryStream();
@@ -117,16 +117,8 @@ public class CamelCaseLambdaJsonSerializerTests
         var data = new TestGameState
         {
             GameCode = "NESTED123",
-            HostPlayer = new TestPlayer
-            {
-                PlayerName = "Alice",
-                PlayerScore = 100
-            },
-            GuestPlayer = new TestPlayer
-            {
-                PlayerName = "Bob",
-                PlayerScore = 150
-            }
+            HostPlayer = new TestPlayer { PlayerName = "Alice", PlayerScore = 100 },
+            GuestPlayer = new TestPlayer { PlayerName = "Bob", PlayerScore = 150 },
         };
 
         using var stream = new MemoryStream();
@@ -149,18 +141,18 @@ public class CamelCaseLambdaJsonSerializerTests
     {
         // Arrange
         var json = """
-        {
-            "gameCode": "NESTED456",
-            "hostPlayer": {
-                "playerName": "Dave",
-                "playerScore": 200
-            },
-            "guestPlayer": {
-                "playerName": "Eve",
-                "playerScore": 300
+            {
+                "gameCode": "NESTED456",
+                "hostPlayer": {
+                    "playerName": "Dave",
+                    "playerScore": 200
+                },
+                "guestPlayer": {
+                    "playerName": "Eve",
+                    "playerScore": 300
+                }
             }
-        }
-        """;
+            """;
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act
@@ -187,8 +179,8 @@ public class CamelCaseLambdaJsonSerializerTests
             Players = new List<TestPlayer>
             {
                 new TestPlayer { PlayerName = "Alice", PlayerScore = 100 },
-                new TestPlayer { PlayerName = "Bob", PlayerScore = 200 }
-            }
+                new TestPlayer { PlayerName = "Bob", PlayerScore = 200 },
+            },
         };
 
         using var stream = new MemoryStream();
@@ -210,14 +202,14 @@ public class CamelCaseLambdaJsonSerializerTests
     {
         // Arrange
         var json = """
-        {
-            "gameCode": "ARRAY789",
-            "players": [
-                { "playerName": "Player1", "playerScore": 50 },
-                { "playerName": "Player2", "playerScore": 75 }
-            ]
-        }
-        """;
+            {
+                "gameCode": "ARRAY789",
+                "players": [
+                    { "playerName": "Player1", "playerScore": 50 },
+                    { "playerName": "Player2", "playerScore": 75 }
+                ]
+            }
+            """;
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act
@@ -237,12 +229,12 @@ public class CamelCaseLambdaJsonSerializerTests
     {
         // Arrange - mixed case property names
         var json = """
-        {
-            "GameCode": "MIXED123",
-            "playerName": "TestPlayer",
-            "TotalScore": 999
-        }
-        """;
+            {
+                "GameCode": "MIXED123",
+                "playerName": "TestPlayer",
+                "TotalScore": 999
+            }
+            """;
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act
@@ -283,7 +275,7 @@ public class CamelCaseLambdaJsonSerializerTests
             StringValue = "test",
             BoolValue = true,
             DoubleValue = 3.14159,
-            LongValue = 1234567890L
+            LongValue = 1234567890L,
         };
 
         using var stream = new MemoryStream();
@@ -310,14 +302,14 @@ public class CamelCaseLambdaJsonSerializerTests
     {
         // Arrange
         var json = """
-        {
-            "intValue": 99,
-            "stringValue": "hello",
-            "boolValue": false,
-            "doubleValue": 2.71828,
-            "longValue": 9876543210
-        }
-        """;
+            {
+                "intValue": 99,
+                "stringValue": "hello",
+                "boolValue": false,
+                "doubleValue": 2.71828,
+                "longValue": 9876543210
+            }
+            """;
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act
@@ -340,7 +332,7 @@ public class CamelCaseLambdaJsonSerializerTests
         {
             GameCode = "ROUNDTRIP",
             HostPlayer = new TestPlayer { PlayerName = "Host", PlayerScore = 111 },
-            GuestPlayer = new TestPlayer { PlayerName = "Guest", PlayerScore = 222 }
+            GuestPlayer = new TestPlayer { PlayerName = "Guest", PlayerScore = 222 },
         };
 
         using var serializeStream = new MemoryStream();

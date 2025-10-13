@@ -80,13 +80,13 @@ public class WebSocketMessageTests
     {
         // Arrange
         var json = """
-        {
-            "type": "GameStarted",
-            "data": {
-                "gameCode": "XYZ789"
+            {
+                "type": "GameStarted",
+                "data": {
+                    "gameCode": "XYZ789"
+                }
             }
-        }
-        """;
+            """;
 
         // Act
         var message = JsonSerializer.Deserialize<WebSocketMessage>(json);
@@ -177,20 +177,20 @@ public class WebSocketMessageTests
     {
         // Arrange
         var json = """
-        {
-            "type": "GameUpdate",
-            "data": {
-                "gameCode": "ABC123",
-                "playerCount": 2
+            {
+                "type": "GameUpdate",
+                "data": {
+                    "gameCode": "ABC123",
+                    "playerCount": 2
+                }
             }
-        }
-        """;
+            """;
 
         // Act
-        var message = JsonSerializer.Deserialize<WebSocketMessage<GameData>>(json, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var message = JsonSerializer.Deserialize<WebSocketMessage<GameData>>(
+            json,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+        );
 
         // Assert
         Assert.NotNull(message);
@@ -219,7 +219,7 @@ public class WebSocketMessageTests
         var request = new ActionRequest
         {
             Action = "joinGame",
-            Data = new { GameCode = "ABC123", PlayerName = "Bob" }
+            Data = new { GameCode = "ABC123", PlayerName = "Bob" },
         };
 
         // Act
@@ -236,13 +236,13 @@ public class WebSocketMessageTests
     {
         // Arrange
         var json = """
-        {
-            "action": "createGame",
-            "data": {
-                "playerName": "Alice"
+            {
+                "action": "createGame",
+                "data": {
+                    "playerName": "Alice"
+                }
             }
-        }
-        """;
+            """;
 
         // Act
         var request = JsonSerializer.Deserialize<ActionRequest>(json);
@@ -260,11 +260,7 @@ public class WebSocketMessageTests
         var data = new JoinGameData { GameCode = "XYZ789", PlayerName = "Charlie" };
 
         // Act
-        var request = new ActionRequest<JoinGameData>
-        {
-            Action = "joinGame",
-            Data = data
-        };
+        var request = new ActionRequest<JoinGameData> { Action = "joinGame", Data = data };
 
         // Assert
         Assert.Equal("joinGame", request.Action);
@@ -278,20 +274,20 @@ public class WebSocketMessageTests
     {
         // Arrange
         var json = """
-        {
-            "action": "joinGame",
-            "data": {
-                "gameCode": "TEST456",
-                "playerName": "Dave"
+            {
+                "action": "joinGame",
+                "data": {
+                    "gameCode": "TEST456",
+                    "playerName": "Dave"
+                }
             }
-        }
-        """;
+            """;
 
         // Act
-        var request = JsonSerializer.Deserialize<ActionRequest<JoinGameData>>(json, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var request = JsonSerializer.Deserialize<ActionRequest<JoinGameData>>(
+            json,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+        );
 
         // Assert
         Assert.NotNull(request);
