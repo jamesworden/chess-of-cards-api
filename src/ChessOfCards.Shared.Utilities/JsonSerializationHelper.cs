@@ -7,6 +7,12 @@ namespace ChessOfCards.Shared.Utilities;
 /// </summary>
 public static class JsonSerializationHelper
 {
+    private static readonly JsonSerializerOptions Options = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true
+    };
+
     /// <summary>
     /// Deserializes an object to a specific type using JSON serialization round-trip.
     /// This is useful when you have a loosely-typed object (like from a JSON property)
@@ -20,6 +26,6 @@ public static class JsonSerializationHelper
         if (data == null)
             return default;
 
-        return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(data));
+        return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(data, Options), Options);
     }
 }
