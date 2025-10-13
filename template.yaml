@@ -58,7 +58,7 @@ Resources:
   ConnectionHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./src/
+      CodeUri: ./src/ChessOfCards.ConnectionHandler/
       Handler: ChessOfCards.ConnectionHandler::ChessOfCards.ConnectionHandler.Function::FunctionHandler
       Description: Handles WebSocket connections and disconnections
       Environment:
@@ -77,15 +77,13 @@ Resources:
                 - execute-api:ManageConnections
               Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/${Environment}/*"
     Metadata:
-      BuildMethod: dotnet8
-      BuildProperties:
-        ProjectName: ChessOfCards.ConnectionHandler/ChessOfCards.ConnectionHandler.csproj
+      BuildMethod: makefile
 
   # Game Action Handler
   GameActionHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./src/
+      CodeUri: ./src/ChessOfCards.GameActionHandler/
       Handler: ChessOfCards.GameActionHandler::ChessOfCards.GameActionHandler.Function::FunctionHandler
       Description: Handles game actions (move, pass, resign, etc.)
       Timeout: 60
@@ -108,9 +106,7 @@ Resources:
                 - execute-api:ManageConnections
               Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/${Environment}/*"
     Metadata:
-      BuildMethod: dotnet8
-      BuildProperties:
-        ProjectName: ChessOfCards.GameActionHandler/ChessOfCards.GameActionHandler.csproj
+      BuildMethod: makefile
 
   # Timer Handler - TODO: Implement in Phase 5
   # TimerHandlerFunction:
