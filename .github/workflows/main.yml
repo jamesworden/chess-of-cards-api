@@ -33,7 +33,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sam-build-artifacts
-          path: .aws-sam/build/ # Standard SAM build output path
+          path: |
+            .aws-sam/build/
+            template.yaml
+            samconfig.toml
 
   # 2. DEV DEPLOYMENT JOB: Runs only when pushing to 'develop'
   deploy_dev:
@@ -62,6 +65,7 @@ jobs:
       - name: SAM Deploy to Development
         run: |
           sam deploy \
+            --template-file .aws-sam/build/template.yaml \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --stack-name ChessOfCardsApi-Dev \
@@ -97,6 +101,7 @@ jobs:
       - name: SAM Deploy to Production
         run: |
           sam deploy \
+            --template-file .aws-sam/build/template.yaml \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --stack-name ChessOfCardsApi-Prod \

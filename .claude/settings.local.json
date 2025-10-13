@@ -5,7 +5,9 @@
       "Bash(sam validate:*)",
       "Bash(dotnet build)",
       "Bash(dotnet clean:*)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(dotnet sln:*)",
+      "Bash(dotnet sln ChessOfCards.sln add src/ChessOfCards.GameActionHandler/ChessOfCards.GameActionHandler.csproj)"
     ],
     "deny": [],
     "ask": []
