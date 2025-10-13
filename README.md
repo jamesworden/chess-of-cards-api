@@ -1,146 +1,266 @@
-# chess-of-cards-api
+# Chess of Cards API
 
-This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
+A serverless WebSocket-based multiplayer game server for Chess of Cards, built with .NET 8, AWS Lambda, API Gateway WebSocket API, and DynamoDB.
 
-- src - Code for the application's Lambda function.
-- events - Invocation events that you can use to invoke the function.
-- test - Unit tests for the application code. 
-- template.yaml - A template that defines the application's AWS resources.
+## Overview
 
-The application uses several AWS resources, including Lambda functions and an API Gateway API. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
+This project implements a real-time multiplayer card game server using AWS serverless technologies. Players connect via WebSocket to create games, join lobbies, and play Chess of Cards with persistent state management in DynamoDB.
 
-If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit.  
-The AWS Toolkit is an open source plug-in for popular IDEs that uses the SAM CLI to build and deploy serverless applications on AWS. The AWS Toolkit also adds a simplified step-through debugging experience for Lambda function code. See the following links to get started.
+## Architecture
 
-* [CLion](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [GoLand](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [IntelliJ](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [WebStorm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [Rider](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [PhpStorm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [PyCharm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [RubyMine](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [DataGrip](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [VS Code](https://docs.aws.amazon.com/toolkit-for-vscode/latest/userguide/welcome.html)
-* [Visual Studio](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/welcome.html)
+- **API Gateway WebSocket API** - Manages WebSocket connections and routes messages
+- **AWS Lambda Functions** - Serverless compute for connection handling and game logic
+- **DynamoDB** - NoSQL database for connection tracking, game state, and timers
+- **AWS SAM** - Infrastructure as Code for deployment and local testing
 
-## Deploy the sample application
+### Lambda Functions
 
-The Serverless Application Model Command Line Interface (SAM CLI) is an extension of the AWS CLI that adds functionality for building and testing Lambda applications. It uses Docker to run your functions in an Amazon Linux environment that matches Lambda. It can also emulate your application's build environment and API.
+1. **ConnectionHandler** - Manages WebSocket lifecycle (`$connect`, `$disconnect`)
+2. **GameActionHandler** - Processes game actions (create, join, move, etc.)
 
-To use the SAM CLI, you need the following tools.
+### DynamoDB Tables
 
-* SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-* .NET Core - [Install .NET Core](https://www.microsoft.com/net/download)
-* Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
+1. **ConnectionsTable** - Active WebSocket connections
+2. **PendingGamesTable** - Game lobbies awaiting players
+3. **ActiveGamesTable** - Active game state
+4. **GameTimersTable** - Game clocks and disconnect timers
 
-To build and deploy your application for the first time, run the following in your shell:
+## Prerequisites
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+- [Docker](https://www.docker.com/products/docker-desktop) (for SAM local testing)
+- [AWS CLI](https://aws.amazon.com/cli/) (configured with credentials)
+
+## Getting Started
+
+### Build the Application
 
 ```bash
+# Build with SAM (recommended for deployment)
 sam build
+
+# Build with SAM using Docker (for Lambda compatibility)
+sam build --use-container --mount-with WRITE
+
+# Build solution directly with .NET CLI
+dotnet build ChessOfCards.sln
+```
+
+### Local Development
+
+```bash
+# Start WebSocket API locally on port 3001
+sam local start-api
+
+# Test with wscat (WebSocket client)
+npm install -g wscat
+wscat -c ws://localhost:3001
+
+# Send a test message
+{"action": "createPendingGame", "playerName": "Alice"}
+```
+
+### Deploy to AWS
+
+```bash
+# First time deployment (guided)
 sam deploy --guided
+
+# Subsequent deployments
+sam deploy
+
+# Deploy to specific environment
+sam deploy --parameter-overrides Environment=dev
+sam deploy --parameter-overrides Environment=prod
 ```
 
-The first command will build the source of your application. The second command will package and deploy your application to AWS, with a series of prompts:
-
-* **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
-* **AWS Region**: The AWS region you want to deploy your app to.
-* **Parameter AppBucketName**: This template includes a parameter to name the S3 bucket you will create as a part of the new application. This name needs to be globally unique.
-* **Confirm changes before deploy**: If set to yes, any change sets will be shown to you before execution for manual review. If set to no, the AWS SAM CLI will automatically deploy application changes.
-* **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modifies IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
-* **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
-
-## Use the SAM CLI to build and test locally
-
-Build your application with the `sam build` command.
+### View Logs
 
 ```bash
-chess-of-cards-api$ sam build
+# Tail logs for ConnectionHandler
+sam logs -n ConnectionHandlerFunction --stack-name ChessOfCardsApi-Dev --tail
+
+# Tail logs for GameActionHandler
+sam logs -n GameActionHandlerFunction --stack-name ChessOfCardsApi-Dev --tail
 ```
 
-The SAM CLI installs dependencies defined in `src/ServerlessAPI/ServerlessAPI.csproj`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
-
-Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
-
-Run functions locally and invoke them with the `sam local invoke` command.
+### Validate Template
 
 ```bash
-chess-of-cards-api$ sam local invoke NetCodeWebAPIServerless --event events/event.json
+sam validate --lint
 ```
 
-The AWS SAM CLI can also emulate your application's API. Use the `sam local start-api` command to run the API locally on port 3000.
+## Project Structure
+
+```
+chess-of-cards-api/
+├── src/
+│   ├── ChessOfCards.Infrastructure/          # Shared library (models, repos, services)
+│   ├── ChessOfCards.ConnectionHandler/       # WebSocket lifecycle Lambda
+│   ├── ChessOfCards.GameActionHandler/       # Game actions Lambda
+│   ├── ChessOfCards.GameActionHandler.Application/  # Game logic
+│   └── ChessOfCards.Shared.Utilities/        # Shared utilities
+├── legacy/                                    # Original EC2-based implementation
+├── template.yaml                              # SAM infrastructure template
+├── samconfig.toml                            # SAM CLI configuration
+├── ChessOfCards.sln                          # .NET solution file
+├── CLAUDE.md                                 # Development guidance
+├── PROJECT_STATUS.md                         # Project roadmap
+└── README.md                                 # This file
+```
+
+## Game Flow
+
+### 1. Create a Game Lobby
+
+```json
+{
+  "action": "createPendingGame",
+  "playerName": "Alice"
+}
+```
+
+**Response:**
+```json
+{
+  "MessageType": "PendingGameCreated",
+  "GameCode": "ABC123",
+  "HostName": "Alice"
+}
+```
+
+### 2. Join a Game
+
+```json
+{
+  "action": "joinGame",
+  "gameCode": "ABC123",
+  "playerName": "Bob"
+}
+```
+
+**Response (to both players):**
+```json
+{
+  "MessageType": "GameStarted",
+  "GameCode": "ABC123",
+  "HostName": "Alice",
+  "GuestName": "Bob",
+  "GameState": "{...}"
+}
+```
+
+### 3. Delete Pending Game
+
+```json
+{
+  "action": "deletePendingGame",
+  "gameCode": "ABC123"
+}
+```
+
+## CI/CD Pipeline
+
+The project uses GitHub Actions for automated deployment:
+
+- **Push to `develop`** → Deploys to Dev environment (`ChessOfCardsApi-Dev`)
+- **Push to `main`** → Deploys to Production environment (`ChessOfCardsApi-Prod`)
+
+### Pipeline Stages
+
+1. **Build** - Compiles .NET projects and creates SAM artifacts
+2. **Deploy Dev** - Deploys to development (conditional on `develop` branch)
+3. **Deploy Prod** - Deploys to production (conditional on `main` branch)
+
+### GitHub Secrets Required
+
+- `AWS_ACCESS_KEY_ID` - AWS access key (per environment)
+- `AWS_SECRET_ACCESS_KEY` - AWS secret key (per environment)
+
+## Development Status
+
+### Completed ✅
+- WebSocket API infrastructure
+- Connection lifecycle management
+- Game lobby system (create, join, delete)
+- DynamoDB repositories and models
+- WebSocket messaging service
+- CI/CD pipeline
+
+### In Progress 🔄
+- Core gameplay logic (Phase 3)
+- Game state management
+- Move validation and processing
+
+### Planned ⏳
+- Timer system for game clocks
+- Reconnection logic
+- Comprehensive unit and integration tests
+- Authentication with AWS Cognito (optional)
+
+See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed roadmap.
+
+## Configuration
+
+### Environment Variables (Lambda)
+
+- `ENVIRONMENT_NAME` - Environment identifier (dev/prod)
+- `CONNECTIONS_TABLE_NAME` - ConnectionsTable name
+- `PENDING_GAMES_TABLE_NAME` - PendingGamesTable name
+- `ACTIVE_GAMES_TABLE_NAME` - ActiveGamesTable name
+- `GAME_TIMERS_TABLE_NAME` - GameTimersTable name
+- `WEBSOCKET_ENDPOINT` - API Gateway WebSocket endpoint URL
+
+### Parameters (SAM Template)
+
+- `Environment` - Environment name (default: dev)
+
+## Testing
+
+### Unit Tests
 
 ```bash
-chess-of-cards-api$ sam local start-api
-chess-of-cards-api$ curl http://localhost:3000/
+# Run all tests
+dotnet test ChessOfCards.sln
+
+# Run tests for specific project (when available)
+dotnet test tests/ChessOfCards.Tests/ChessOfCards.Tests.csproj
 ```
 
-## Add a resource to your application
-
-The application template uses AWS SAM to define application resources. AWS SAM is an extension of AWS CloudFormation with a simpler syntax for configuring common serverless application resources, such as functions, triggers, and APIs. For resources that aren't included in the [AWS SAM specification](https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md), you can use the standard [AWS CloudFormation resource types](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html).
-
-Update `template.yaml` to add a dead-letter queue to your application. In the **Resources** section, add a resource named **MyQueue** with the type **AWS::SQS::Queue**. Then add a property to the **AWS::Serverless::Function** resource named **DeadLetterQueue** that targets the queue's Amazon Resource Name (ARN), and a policy that grants the function permission to access the queue.
-
-```yaml
-Resources:
-  MyQueue:
-    Type: AWS::SQS::Queue
-  NetCodeWebAPIServerless:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: ./src/ServerlessAPI/
-      Handler: ServerlessAPI::ServerlessAPI.Function::FunctionHandler
-      Runtime: dotnet8
-      MemorySize: 1042
-      DeadLetterQueue:
-        Type: SQS
-        TargetArn: !GetAtt MyQueue.Arn
-      Policies:
-        - SQSSendMessagePolicy:
-            QueueName: !GetAtt MyQueue.QueueName
-```
-
-The dead-letter queue is a location for Lambda to send events that could not be processed. It's only used if you invoke your function asynchronously, but it's useful here to show how you can modify your application's resources and function configuration.
-
-Deploy the updated application.
+### Manual Testing with wscat
 
 ```bash
-chess-of-cards-api$ sam build
-chess-of-cards-api$ sam deploy
-```
+# Install wscat globally
+npm install -g wscat
 
-Open the [**Applications**](https://console.aws.amazon.com/lambda/home#/applications) page of the Lambda console, and choose your application. When the deployment completes, view the application resources on the **Overview** tab to see the new resource. Then, choose the function to see the updated configuration that specifies the dead-letter queue.
+# Connect to local WebSocket API
+wscat -c ws://localhost:3001
 
-## Fetch, tail, and filter Lambda function logs
-
-To simplify troubleshooting, SAM CLI has a command called `sam logs`. `sam logs` lets you fetch logs generated by your deployed Lambda function from the command line. In addition to printing the logs on the terminal, this command has several nifty features to help you quickly find the bug.
-
-`NOTE`: This command works for all AWS Lambda functions; not just the ones you deploy using SAM.
-
-```bash
-chess-of-cards-api$ sam logs -n NetCodeWebAPIServerless --stack-name chess-of-cards-api --tail
-```
-
-You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
-
-## Unit tests
-
-Tests are defined in the `test` folder in this project.
-
-```bash
-chess-of-cards-api$ dotnet test test/ServerlessAPI.Tests/ServerlessAPI.Tests.csproj 
+# Connect to deployed WebSocket API
+wscat -c wss://your-api-id.execute-api.us-east-1.amazonaws.com/dev
 ```
 
 ## Cleanup
 
-To delete the sample application that you created, use the AWS CLI. Assuming you used your project name for the stack name, you can run the following:
+To delete the deployed stack:
 
 ```bash
-sam delete --stack-name chess-of-cards-api
+sam delete --stack-name ChessOfCardsApi-Dev
+sam delete --stack-name ChessOfCardsApi-Prod
 ```
 
 ## Resources
 
-See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
+- [AWS SAM Documentation](https://docs.aws.amazon.com/serverless-application-model/)
+- [API Gateway WebSocket API](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api.html)
+- [DynamoDB Best Practices](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/best-practices.html)
+- [Lambda Best Practices](https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html)
 
-Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
+## License
+
+[Include your license information here]
+
+## Contributing
+
+[Include contribution guidelines here]

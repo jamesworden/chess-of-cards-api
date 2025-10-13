@@ -4,15 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a .NET 8 serverless application deployed to AWS Lambda using SAM (Serverless Application Model). The application is an ASP.NET Core Web API that provides a REST API backed by DynamoDB. Despite the name "chess-of-cards-api" and controller name "Books", the entities are generic and use `GameId` as the primary identifier.
+This is a .NET 8 serverless application deployed to AWS Lambda using SAM (Serverless Application Model). The application is a WebSocket-based multiplayer game server for Chess of Cards, using API Gateway WebSocket API, Lambda functions, and DynamoDB for state management.
 
 ## Technology Stack
 
 - **Runtime**: .NET 8 / C#
-- **Framework**: ASP.NET Core Web API with minimal API support
-- **AWS Services**: Lambda, API Gateway (HTTP API), DynamoDB
+- **Framework**: AWS Lambda with WebSocket support
+- **AWS Services**: Lambda, API Gateway (WebSocket API), DynamoDB
 - **Infrastructure**: AWS SAM for deployment
-- **Testing**: xUnit with Bogus for test data generation
+- **Testing**: xUnit (in development)
 
 ## Essential Commands
 
@@ -25,22 +25,19 @@ sam build
 # Build with Docker container (required for Lambda compatibility)
 sam build --use-container --mount-with WRITE
 
-# Run unit tests
-dotnet test tests/ServerlessAPI.Tests/ServerlessAPI.Tests.csproj
+# Build the solution
+dotnet build ChessOfCards.sln
 ```
 
 ### Local Development
 
 ```bash
-# Start API locally on port 3000
+# Start WebSocket API locally
 sam local start-api
 
-# Invoke a specific Lambda function with test event
-sam local invoke NetCodeWebAPIServerless --event events/event.json
-
-# Test the local API
-curl http://localhost:3000/
-curl http://localhost:3000/api/books
+# Test with wscat (WebSocket client)
+npm install -g wscat
+wscat -c ws://localhost:3001
 ```
 
 ### Deployment
@@ -56,8 +53,9 @@ sam deploy
 sam deploy --parameter-overrides Environment=dev
 sam deploy --parameter-overrides Environment=prod
 
-# View logs from deployed Lambda
-sam logs -n NetCodeWebAPIServerless --stack-name chess-of-cards-api --tail
+# View logs from deployed Lambda functions
+sam logs -n ConnectionHandlerFunction --stack-name ChessOfCardsApi-Dev --tail
+sam logs -n GameActionHandlerFunction --stack-name ChessOfCardsApi-Dev --tail
 ```
 
 ### Validation
@@ -72,69 +70,123 @@ sam validate --lint
 ### Application Structure
 
 ```
-src/ServerlessAPI/
-├── Program.cs                 # Application entry point, DI configuration
-├── Controllers/
-│   └── BooksController.cs     # REST API endpoints (CRUD operations)
-├── Entities/
-│   └── Book.cs               # DynamoDB entity model with mapping attributes
-└── Repositories/
-    ├── IBookRepository.cs    # Repository interface
-    └── BookRepository.cs     # DynamoDB data access implementation
+src/
+├── ChessOfCards.Infrastructure/          # Shared library
+│   ├── Models/                          # DynamoDB entity models
+│   │   ├── ConnectionRecord.cs
+│   │   ├── PendingGameRecord.cs
+│   │   ├── ActiveGameRecord.cs
+│   │   └── GameTimerRecord.cs
+│   ├── Repositories/                    # Data access layer
+│   │   ├── IConnectionRepository.cs
+│   │   ├── ConnectionRepository.cs
+│   │   ├── IPendingGameRepository.cs
+│   │   ├── PendingGameRepository.cs
+│   │   ├── IActiveGameRepository.cs
+│   │   ├── ActiveGameRepository.cs
+│   │   ├── IGameTimerRepository.cs
+│   │   └── GameTimerRepository.cs
+│   ├── Services/                        # Business logic
+│   │   └── WebSocketService.cs
+│   └── Messages/                        # Message type definitions
+│       └── MessageTypes.cs
+├── ChessOfCards.ConnectionHandler/      # WebSocket lifecycle Lambda
+│   ├── Function.cs                      # Handles $connect, $disconnect
+│   └── ChessOfCards.ConnectionHandler.csproj
+├── ChessOfCards.GameActionHandler/      # Game actions Lambda
+│   ├── Function.cs                      # Routes game actions
+│   ├── Handlers/                        # Action-specific handlers
+│   └── ChessOfCards.GameActionHandler.csproj
+├── ChessOfCards.GameActionHandler.Application/  # Game logic
+│   └── ChessOfCards.GameActionHandler.Application.csproj
+└── ChessOfCards.Shared.Utilities/       # Shared utilities
+    └── ChessOfCards.Shared.Utilities.csproj
 ```
 
-### Dependency Injection Setup (Program.cs)
+### Lambda Functions
 
-The application uses standard ASP.NET Core DI with AWS-specific registrations:
-- `IAmazonDynamoDB` - DynamoDB client (singleton)
-- `IDynamoDBContext` - DynamoDB context for ORM operations (scoped)
-- `IBookRepository` - Business logic repository (scoped)
-- `AddAWSLambdaHosting(LambdaEventSource.HttpApi)` - Replaces Kestrel with Lambda hosting
+#### ConnectionHandler
+- **Purpose**: Manages WebSocket connection lifecycle
+- **Routes**: `$connect`, `$disconnect`
+- **Responsibilities**:
+  - Create connection records in DynamoDB
+  - Handle graceful disconnections with grace period
+  - Notify opponents of disconnections
+  - Clean up timers
 
-### DynamoDB Entity Mapping
+#### GameActionHandler
+- **Purpose**: Processes all game actions
+- **Route**: `$default` (all non-connection messages)
+- **Actions**:
+  - `createPendingGame` - Host creates a game lobby
+  - `joinGame` - Guest joins with game code
+  - `deletePendingGame` - Host cancels pending game
+  - `makeMove` - Player makes a move (in development)
+  - `passMove` - Player passes their turn (in development)
+  - `resignGame` - Player resigns (in development)
 
-The `Book` entity uses DynamoDB attributes for ORM mapping:
-- `[DynamoDBTable("chess-of-cards-api-game")]` - Maps to table (hardcoded, overridden by environment variable)
-- `[DynamoDBHashKey]` - Partition key (GameId)
-- `[DynamoDBProperty]` - Standard properties
-- `[DynamoDBIgnore]` - Excluded from persistence
+### DynamoDB Tables
 
-The actual table name is determined by the `SAMPLE_TABLE` environment variable, which is set dynamically per environment via `template.yaml`.
+#### ConnectionsTable
+- **Purpose**: Track active WebSocket connections
+- **Primary Key**: `connectionId` (String)
+- **GSI**: `GameCodeIndex` (gameCode)
+- **TTL**: Enabled for automatic cleanup
 
-### Repository Pattern
+#### PendingGamesTable
+- **Purpose**: Store game lobbies awaiting second player
+- **Primary Key**: `gameCode` (String)
+- **GSI**: `HostConnectionIndex` (hostConnectionId + createdAt)
+- **TTL**: Enabled for automatic cleanup
 
-`BookRepository` implements standard CRUD operations:
-- Uses `IDynamoDBContext` for high-level DynamoDB operations
-- Uses `ScanOperationConfig` for listing with limits
-- All operations include error handling and structured logging
+#### ActiveGamesTable
+- **Purpose**: Store active game state
+- **Primary Key**: `gameCode` (String)
+- **GSIs**:
+  - `HostConnectionIndex` (hostConnectionId + createdAt)
+  - `GuestConnectionIndex` (guestConnectionId + createdAt)
+- **TTL**: Enabled for automatic cleanup
+
+#### GameTimersTable
+- **Purpose**: Track game clocks and disconnect timers
+- **Primary Key**: `timerId` (String)
+- **GSI**: `ExpiryIndex` (timerType + expiresAt)
+- **TTL**: Enabled for automatic cleanup
 
 ## Infrastructure (template.yaml)
 
 ### Key Resources
 
-- **NetCodeWebAPIServerless** - Lambda function running ASP.NET Core
-  - Runtime: dotnet8
-  - Handler: ServerlessAPI (assembly name)
-  - Memory: 1024 MB
-  - Timeout: 100 seconds (global)
+- **ChessWebSocketApi** - API Gateway WebSocket API
+  - Protocol: WEBSOCKET
+  - Route Selection: `$request.body.action`
+  - Stages: dev, prod
 
-- **GameTable** - DynamoDB table
-  - Table name: `chess-of-cards-api-game-{Environment}`
-  - Primary key: GameId (String)
-  - Provisioned capacity: 2 RCU / 2 WCU
+- **ConnectionHandlerFunction** - Connection lifecycle Lambda
+  - Runtime: dotnet8
+  - Handler: ChessOfCards.ConnectionHandler::ChessOfCards.ConnectionHandler.Function::FunctionHandler
+  - Memory: 512 MB
+  - Timeout: 30 seconds
+
+- **GameActionHandlerFunction** - Game actions Lambda
+  - Runtime: dotnet8
+  - Handler: ChessOfCards.GameActionHandler::ChessOfCards.GameActionHandler.Function::FunctionHandler
+  - Memory: 1024 MB
+  - Timeout: 60 seconds
 
 ### Environment Parameters
 
 The stack supports `Environment` parameter (dev/prod) which:
-- Determines the DynamoDB table name suffix
+- Determines all DynamoDB table name suffixes
 - Is passed to Lambda via `ENVIRONMENT_NAME` environment variable
+- Controls WebSocket API stage name
 - Defaults to "dev"
 
-### API Gateway Configuration
+### Build Configuration
 
-- Uses HTTP API (not REST API) with PayloadFormatVersion 2.0
-- Two event sources: `/{proxy+}` and `/` for catch-all routing
-- ASP.NET Core routing handles all path mapping
+- Uses `Makefile` build method for multi-project builds
+- Shared `Makefile` in `src/` directory handles compilation of all projects
+- Produces Lambda deployment packages for each function
 
 ## CI/CD Pipeline (.github/workflows/main.yml)
 
@@ -147,62 +199,108 @@ The stack supports `Environment` parameter (dev/prod) which:
 2. **Deploy Dev** - Runs only on pushes to `develop` branch
    - Deploys to dev environment with `Environment=dev`
    - Uses GitHub environment: `dev`
+   - Stack name: `ChessOfCardsApi-Dev`
 
 3. **Deploy Prod** - Runs only on pushes to `main` branch
    - Deploys to production with `Environment=prod`
    - Uses GitHub environment: `prod`
+   - Stack name: `ChessOfCardsApi-Prod`
 
 ### Important Notes
 
 - SAM build uses `--mount-with WRITE` flag to avoid interactive prompts in CI
-- Deployments use separate S3 bucket: `chess-of-cards-api-artifacts`
-- Stack names: `ChessOfCardsApi-Dev` and `ChessOfCardsApi-Prod`
 - AWS credentials are stored as environment-specific secrets
+- Deploys to `us-east-1` region
 
-## Testing
+## Message Protocol
 
-### Test Structure
+### Client-to-Server Messages
 
+All messages are JSON with an `action` field:
+
+```json
+{
+  "action": "createPendingGame",
+  "playerName": "Alice"
+}
 ```
-tests/ServerlessAPI.Tests/
-├── BookControllerTest.cs       # Controller unit tests
-└── MockBookRepository.cs       # Mock repository implementation
+
+```json
+{
+  "action": "joinGame",
+  "gameCode": "ABC123",
+  "playerName": "Bob"
+}
 ```
 
-### Testing Approach
+### Server-to-Client Messages
 
-- Uses xUnit test framework
-- Uses `Microsoft.AspNetCore.Mvc.Testing` for controller testing
-- Uses Bogus library for generating test data
-- Uses mocks (MockBookRepository) instead of DynamoDB for unit tests
-- Project has `InternalsVisibleTo` attribute for test access
+Messages use `MessageType` field for routing:
+
+```json
+{
+  "MessageType": "GameStarted",
+  "GameCode": "ABC123",
+  "HostName": "Alice",
+  "GuestName": "Bob",
+  "GameState": "{...}"
+}
+```
 
 ## Configuration Files
 
 - **samconfig.toml** - SAM CLI configuration with build/deploy defaults
 - **omnisharp.json** - C# IDE configuration
-- **aws-lambda-tools-defaults.json** - AWS Lambda tooling defaults (in src/ServerlessAPI/)
+- **Makefile** (in src/) - Build orchestration for multiple Lambda projects
+
+## Current Development Status
+
+### Completed (Phase 1 & 2)
+- ✅ WebSocket API infrastructure
+- ✅ Connection lifecycle management
+- ✅ Game lobby system (create, join, delete)
+- ✅ DynamoDB repositories
+- ✅ WebSocket messaging service
+- ✅ CI/CD pipeline
+
+### In Progress (Phase 3)
+- 🔄 Core gameplay logic
+- 🔄 Game state management
+- 🔄 Move validation
+
+### Planned
+- ⏳ Timer system for game clocks
+- ⏳ Reconnection logic
+- ⏳ Comprehensive testing
+- ⏳ Authentication (optional)
 
 ## Important Implementation Notes
 
-### Naming Inconsistencies
+### WebSocket Connection Flow
 
-The codebase has legacy naming issues to be aware of:
-- The entity is called `Book` but uses `GameId` as primary key
-- Controller property references: `new { id = book.GameId }` in POST
-- Comments refer to "books" but the domain appears to be games
+1. Client connects → `$connect` route → ConnectionHandler creates record
+2. Client sends action → `$default` route → GameActionHandler processes
+3. Client disconnects → `$disconnect` route → ConnectionHandler cleanup
 
-### DynamoDB Table Configuration
+### Error Handling
 
-- Table name in `Book.cs` is hardcoded but overridden by environment variable `SAMPLE_TABLE`
-- Template creates environment-specific tables: `chess-of-cards-api-game-{Environment}`
-- This allows dev/prod isolation
+- All Lambda functions return proper WebSocket response format
+- Errors are logged to CloudWatch with structured JSON
+- Clients receive error messages via WebSocket
 
 ### Logging
 
-- Uses structured JSON logging via `AddJsonConsole()`
-- Repository operations log to CloudWatch with correlation to DynamoDB operations
+- Uses structured JSON logging via AWS Lambda logging
+- All operations log to CloudWatch Logs
+- Log groups: `/aws/lambda/ConnectionHandlerFunction`, `/aws/lambda/GameActionHandlerFunction`
 
 ## AWS Region
 
-Default region is `us-east-2` (Ohio) in code, but GitHub Actions deploys to `us-east-1` (N. Virginia). Verify region consistency when deploying or debugging.
+Default deployment region is `us-east-1` (N. Virginia). All resources are deployed to this region by default.
+
+## Related Documentation
+
+- **PROJECT_STATUS.md** - Detailed project roadmap and current progress
+- **SERVERLESS_ARCHITECTURE.md** - Architecture design document
+- **DEPLOYMENT.md** - Deployment guide
+- **README.md** - Project overview
