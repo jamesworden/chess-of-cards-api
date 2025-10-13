@@ -4,6 +4,7 @@ using Amazon.Runtime;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ChessOfCards.Infrastructure.Services;
 
@@ -13,6 +14,12 @@ namespace ChessOfCards.Infrastructure.Services;
 public class WebSocketService
 {
     private readonly IAmazonApiGatewayManagementApi _apiClient;
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
 
     public WebSocketService(string websocketEndpoint)
     {
@@ -32,7 +39,7 @@ public class WebSocketService
     {
         try
         {
-            var json = JsonSerializer.Serialize(message);
+            var json = JsonSerializer.Serialize(message, JsonOptions);
             var bytes = Encoding.UTF8.GetBytes(json);
 
             var postRequest = new PostToConnectionRequest
