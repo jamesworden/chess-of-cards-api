@@ -10,7 +10,7 @@ namespace ServerlessAPI.Entities;
 public class Book
 {
     ///<summary>
-    /// Map c# types to DynamoDb Columns 
+    /// Map c# types to DynamoDb Columns
     /// to learn more visit https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/MidLevelAPILimitations.SupportedTypes.html
     /// <summary>
     [DynamoDBHashKey] //Partition key

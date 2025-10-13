@@ -40,10 +40,10 @@ public class BookRepository : IBookRepository
             // Delete the book.
             await context.DeleteAsync<Book>(book.GameId);
             // Try to retrieve deleted book. It should return null.
-            Book deletedBook = await context.LoadAsync<Book>(book.GameId, new DynamoDBContextConfig
-            {
-                ConsistentRead = true
-            });
+            Book deletedBook = await context.LoadAsync<Book>(
+                book.GameId,
+                new DynamoDBContextConfig { ConsistentRead = true }
+            );
 
             result = deletedBook == null;
         }
@@ -53,14 +53,16 @@ public class BookRepository : IBookRepository
             result = false;
         }
 
-        if (result) logger.LogInformation("Book {Id} is deleted", book);
+        if (result)
+            logger.LogInformation("Book {Id} is deleted", book);
 
         return result;
     }
 
     public async Task<bool> UpdateAsync(Book book)
     {
-        if (book == null) return false;
+        if (book == null)
+            return false;
 
         try
         {
@@ -102,18 +104,13 @@ public class BookRepository : IBookRepository
 
             var filter = new ScanFilter();
             filter.AddCondition("Id", ScanOperator.IsNotNull);
-            var scanConfig = new ScanOperationConfig()
-            {
-                Limit = limit,
-                Filter = filter
-            };
+            var scanConfig = new ScanOperationConfig() { Limit = limit, Filter = filter };
             var queryResult = context.FromScanAsync<Book>(scanConfig);
 
             do
             {
                 result.AddRange(await queryResult.GetNextSetAsync());
-            }
-            while (!queryResult.IsDone && result.Count < limit);
+            } while (!queryResult.IsDone && result.Count < limit);
         }
         catch (Exception ex)
         {

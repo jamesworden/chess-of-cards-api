@@ -40,11 +40,13 @@ public class GameTimerRecord
     [DynamoDBProperty("ttl")]
     public long Ttl { get; set; }
 
-    public GameTimerRecord()
-    {
-    }
+    public GameTimerRecord() { }
 
-    public static GameTimerRecord CreateGameClock(string gameCode, string playerRole, double totalSeconds)
+    public static GameTimerRecord CreateGameClock(
+        string gameCode,
+        string playerRole,
+        double totalSeconds
+    )
     {
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         return new GameTimerRecord
@@ -57,11 +59,15 @@ public class GameTimerRecord
             StartedAt = now,
             SecondsElapsed = 0,
             SecondsRemaining = totalSeconds,
-            Ttl = now + (long)totalSeconds + 3600 // 1 hour buffer
+            Ttl = now + (long)totalSeconds + 3600, // 1 hour buffer
         };
     }
 
-    public static GameTimerRecord CreateDisconnectTimer(string gameCode, string playerRole, double gracePeriodSeconds = 30)
+    public static GameTimerRecord CreateDisconnectTimer(
+        string gameCode,
+        string playerRole,
+        double gracePeriodSeconds = 30
+    )
     {
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         return new GameTimerRecord
@@ -74,7 +80,7 @@ public class GameTimerRecord
             StartedAt = now,
             SecondsElapsed = 0,
             SecondsRemaining = gracePeriodSeconds,
-            Ttl = now + (long)gracePeriodSeconds + 600 // 10 minute buffer
+            Ttl = now + (long)gracePeriodSeconds + 600, // 10 minute buffer
         };
     }
 }

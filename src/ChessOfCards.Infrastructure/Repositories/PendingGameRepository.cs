@@ -14,19 +14,16 @@ public class PendingGameRepository : IPendingGameRepository
 
     public PendingGameRepository(IAmazonDynamoDB dynamoDbClient, string tableName)
     {
-        _context = new DynamoDBContext(dynamoDbClient, new DynamoDBContextConfig
-        {
-            TableNamePrefix = string.Empty
-        });
+        _context = new DynamoDBContext(
+            dynamoDbClient,
+            new DynamoDBContextConfig { TableNamePrefix = string.Empty }
+        );
         _tableName = tableName;
     }
 
     public async Task<PendingGameRecord> CreateAsync(PendingGameRecord game)
     {
-        var config = new DynamoDBOperationConfig
-        {
-            OverrideTableName = _tableName
-        };
+        var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
         await _context.SaveAsync(game, config);
         return game;
@@ -34,10 +31,7 @@ public class PendingGameRepository : IPendingGameRepository
 
     public async Task<PendingGameRecord?> GetByGameCodeAsync(string gameCode)
     {
-        var config = new DynamoDBOperationConfig
-        {
-            OverrideTableName = _tableName
-        };
+        var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
         return await _context.LoadAsync<PendingGameRecord>(gameCode, config);
     }
@@ -47,7 +41,7 @@ public class PendingGameRepository : IPendingGameRepository
         var config = new DynamoDBOperationConfig
         {
             OverrideTableName = _tableName,
-            IndexName = "HostConnectionIndex"
+            IndexName = "HostConnectionIndex",
         };
 
         var search = _context.QueryAsync<PendingGameRecord>(hostConnectionId, config);
@@ -57,10 +51,7 @@ public class PendingGameRepository : IPendingGameRepository
 
     public async Task<List<PendingGameRecord>> GetAllAsync()
     {
-        var config = new DynamoDBOperationConfig
-        {
-            OverrideTableName = _tableName
-        };
+        var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
         var search = _context.ScanAsync<PendingGameRecord>(new List<ScanCondition>(), config);
         return await search.GetRemainingAsync();
@@ -70,10 +61,7 @@ public class PendingGameRepository : IPendingGameRepository
     {
         try
         {
-            var config = new DynamoDBOperationConfig
-            {
-                OverrideTableName = _tableName
-            };
+            var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
             await _context.DeleteAsync<PendingGameRecord>(gameCode, config);
             return true;

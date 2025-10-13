@@ -1,10 +1,10 @@
-using Amazon.ApiGatewayManagementApi;
-using Amazon.ApiGatewayManagementApi.Model;
-using Amazon.Runtime;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Amazon.ApiGatewayManagementApi;
+using Amazon.ApiGatewayManagementApi.Model;
+using Amazon.Runtime;
 
 namespace ChessOfCards.Infrastructure.Services;
 
@@ -18,17 +18,14 @@ public class WebSocketService
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
     public WebSocketService(string websocketEndpoint)
     {
         var serviceUrl = websocketEndpoint.Replace("wss://", "https://");
         _apiClient = new AmazonApiGatewayManagementApiClient(
-            new AmazonApiGatewayManagementApiConfig
-            {
-                ServiceURL = serviceUrl
-            }
+            new AmazonApiGatewayManagementApiConfig { ServiceURL = serviceUrl }
         );
     }
 
@@ -45,7 +42,7 @@ public class WebSocketService
             var postRequest = new PostToConnectionRequest
             {
                 ConnectionId = connectionId,
-                Data = new MemoryStream(bytes)
+                Data = new MemoryStream(bytes),
             };
 
             await _apiClient.PostToConnectionAsync(postRequest);
@@ -69,7 +66,8 @@ public class WebSocketService
     /// </summary>
     public async Task<Dictionary<string, bool>> SendMessageToMultipleAsync(
         IEnumerable<string> connectionIds,
-        object message)
+        object message
+    )
     {
         var results = new Dictionary<string, bool>();
         var tasks = connectionIds.Select(async connectionId =>
@@ -94,10 +92,7 @@ public class WebSocketService
     {
         try
         {
-            var request = new GetConnectionRequest
-            {
-                ConnectionId = connectionId
-            };
+            var request = new GetConnectionRequest { ConnectionId = connectionId };
             await _apiClient.GetConnectionAsync(request);
             return true;
         }
@@ -118,10 +113,7 @@ public class WebSocketService
     {
         try
         {
-            var request = new DeleteConnectionRequest
-            {
-                ConnectionId = connectionId
-            };
+            var request = new DeleteConnectionRequest { ConnectionId = connectionId };
             await _apiClient.DeleteConnectionAsync(request);
             return true;
         }

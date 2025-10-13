@@ -28,11 +28,14 @@ public class PendingGameRecord
     [DynamoDBProperty("ttl")]
     public long Ttl { get; set; } // Auto-expire after 10 minutes
 
-    public PendingGameRecord()
-    {
-    }
+    public PendingGameRecord() { }
 
-    public PendingGameRecord(string gameCode, string hostConnectionId, string durationOption, string? hostName)
+    public PendingGameRecord(
+        string gameCode,
+        string hostConnectionId,
+        string durationOption,
+        string? hostName
+    )
     {
         GameCode = gameCode;
         HostConnectionId = hostConnectionId;

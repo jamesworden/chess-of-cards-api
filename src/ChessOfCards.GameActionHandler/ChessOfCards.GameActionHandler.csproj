@@ -13,8 +13,15 @@
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.4" />
     <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="2.7.1" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.400" />
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="MediatR" Version="12.3.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChessOfCards.Infrastructure\ChessOfCards.Infrastructure.csproj" />
+    <ProjectReference Include="..\ChessOfCards.GameActionHandler.Application\ChessOfCards.GameActionHandler.Application.csproj" />
+    <ProjectReference Include="..\ChessOfCards.Shared.Utilities\ChessOfCards.Shared.Utilities.csproj" />
   </ItemGroup>
 </Project>

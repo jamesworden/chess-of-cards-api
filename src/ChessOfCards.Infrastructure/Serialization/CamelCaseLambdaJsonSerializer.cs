@@ -1,6 +1,6 @@
-using Amazon.Lambda.Serialization.SystemTextJson;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Amazon.Lambda.Serialization.SystemTextJson;
 
 namespace ChessOfCards.Infrastructure.Serialization;
 
@@ -11,9 +11,7 @@ namespace ChessOfCards.Infrastructure.Serialization;
 public class CamelCaseLambdaJsonSerializer : DefaultLambdaJsonSerializer
 {
     public CamelCaseLambdaJsonSerializer()
-        : base(CreateCustomizer())
-    {
-    }
+        : base(CreateCustomizer()) { }
 
     private static Action<JsonSerializerOptions> CreateCustomizer()
     {

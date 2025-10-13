@@ -59,12 +59,17 @@ public class ActiveGameRecord
     [DynamoDBProperty("ttl")]
     public long Ttl { get; set; } // Auto-expire after 7 days
 
-    public ActiveGameRecord()
-    {
-    }
+    public ActiveGameRecord() { }
 
-    public ActiveGameRecord(string gameCode, string hostConnectionId, string guestConnectionId,
-        string durationOption, string? hostName, string? guestName, string gameState)
+    public ActiveGameRecord(
+        string gameCode,
+        string hostConnectionId,
+        string guestConnectionId,
+        string durationOption,
+        string? hostName,
+        string? guestName,
+        string gameState
+    )
     {
         GameCode = gameCode;
         HostConnectionId = hostConnectionId;

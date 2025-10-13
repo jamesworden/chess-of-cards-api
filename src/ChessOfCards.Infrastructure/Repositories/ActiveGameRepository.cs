@@ -17,19 +17,16 @@ public class ActiveGameRepository : IActiveGameRepository
     public ActiveGameRepository(IAmazonDynamoDB dynamoDbClient, string tableName)
     {
         _client = dynamoDbClient;
-        _context = new DynamoDBContext(dynamoDbClient, new DynamoDBContextConfig
-        {
-            TableNamePrefix = string.Empty
-        });
+        _context = new DynamoDBContext(
+            dynamoDbClient,
+            new DynamoDBContextConfig { TableNamePrefix = string.Empty }
+        );
         _tableName = tableName;
     }
 
     public async Task<ActiveGameRecord> CreateAsync(ActiveGameRecord game)
     {
-        var config = new DynamoDBOperationConfig
-        {
-            OverrideTableName = _tableName
-        };
+        var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
         await _context.SaveAsync(game, config);
         return game;
@@ -37,10 +34,7 @@ public class ActiveGameRepository : IActiveGameRepository
 
     public async Task<ActiveGameRecord?> GetByGameCodeAsync(string gameCode)
     {
-        var config = new DynamoDBOperationConfig
-        {
-            OverrideTableName = _tableName
-        };
+        var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
         return await _context.LoadAsync<ActiveGameRecord>(gameCode, config);
     }
@@ -51,7 +45,7 @@ public class ActiveGameRepository : IActiveGameRepository
         var hostConfig = new DynamoDBOperationConfig
         {
             OverrideTableName = _tableName,
-            IndexName = "HostConnectionIndex"
+            IndexName = "HostConnectionIndex",
         };
 
         var hostSearch = _context.QueryAsync<ActiveGameRecord>(connectionId, hostConfig);
@@ -65,7 +59,7 @@ public class ActiveGameRepository : IActiveGameRepository
         var guestConfig = new DynamoDBOperationConfig
         {
             OverrideTableName = _tableName,
-            IndexName = "GuestConnectionIndex"
+            IndexName = "GuestConnectionIndex",
         };
 
         var guestSearch = _context.QueryAsync<ActiveGameRecord>(connectionId, guestConfig);
@@ -90,38 +84,69 @@ public class ActiveGameRepository : IActiveGameRepository
                 TableName = _tableName,
                 Key = new Dictionary<string, AttributeValue>
                 {
-                    { "gameCode", new AttributeValue { S = game.GameCode } }
+                    {
+                        "gameCode",
+                        new AttributeValue { S = game.GameCode }
+                    },
                 },
-                UpdateExpression = "SET gameState = :gameState, " +
-                                   "isHostPlayersTurn = :isHostPlayersTurn, " +
-                                   "hasEnded = :hasEnded, " +
-                                   "wonBy = :wonBy, " +
-                                   "updatedAt = :updatedAt, " +
-                                   "#version = :newVersion, " +
-                                   "hostDisconnectedAt = :hostDisconnectedAt, " +
-                                   "guestDisconnectedAt = :guestDisconnectedAt",
+                UpdateExpression =
+                    "SET gameState = :gameState, "
+                    + "isHostPlayersTurn = :isHostPlayersTurn, "
+                    + "hasEnded = :hasEnded, "
+                    + "wonBy = :wonBy, "
+                    + "updatedAt = :updatedAt, "
+                    + "#version = :newVersion, "
+                    + "hostDisconnectedAt = :hostDisconnectedAt, "
+                    + "guestDisconnectedAt = :guestDisconnectedAt",
                 ConditionExpression = "#version = :expectedVersion",
                 ExpressionAttributeNames = new Dictionary<string, string>
                 {
-                    { "#version", "version" }
+                    { "#version", "version" },
                 },
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    { ":gameState", new AttributeValue { S = game.GameState } },
-                    { ":isHostPlayersTurn", new AttributeValue { BOOL = game.IsHostPlayersTurn } },
-                    { ":hasEnded", new AttributeValue { BOOL = game.HasEnded } },
-                    { ":wonBy", new AttributeValue { S = game.WonBy } },
-                    { ":updatedAt", new AttributeValue { N = now.ToString() } },
-                    { ":expectedVersion", new AttributeValue { N = game.Version.ToString() } },
-                    { ":newVersion", new AttributeValue { N = newVersion.ToString() } },
-                    { ":hostDisconnectedAt", game.HostDisconnectedAt.HasValue
-                        ? new AttributeValue { N = game.HostDisconnectedAt.Value.ToString() }
-                        : new AttributeValue { NULL = true } },
-                    { ":guestDisconnectedAt", game.GuestDisconnectedAt.HasValue
-                        ? new AttributeValue { N = game.GuestDisconnectedAt.Value.ToString() }
-                        : new AttributeValue { NULL = true } }
+                    {
+                        ":gameState",
+                        new AttributeValue { S = game.GameState }
+                    },
+                    {
+                        ":isHostPlayersTurn",
+                        new AttributeValue { BOOL = game.IsHostPlayersTurn }
+                    },
+                    {
+                        ":hasEnded",
+                        new AttributeValue { BOOL = game.HasEnded }
+                    },
+                    {
+                        ":wonBy",
+                        new AttributeValue { S = game.WonBy }
+                    },
+                    {
+                        ":updatedAt",
+                        new AttributeValue { N = now.ToString() }
+                    },
+                    {
+                        ":expectedVersion",
+                        new AttributeValue { N = game.Version.ToString() }
+                    },
+                    {
+                        ":newVersion",
+                        new AttributeValue { N = newVersion.ToString() }
+                    },
+                    {
+                        ":hostDisconnectedAt",
+                        game.HostDisconnectedAt.HasValue
+                            ? new AttributeValue { N = game.HostDisconnectedAt.Value.ToString() }
+                            : new AttributeValue { NULL = true }
+                    },
+                    {
+                        ":guestDisconnectedAt",
+                        game.GuestDisconnectedAt.HasValue
+                            ? new AttributeValue { N = game.GuestDisconnectedAt.Value.ToString() }
+                            : new AttributeValue { NULL = true }
+                    },
                 },
-                ReturnValues = ReturnValue.ALL_NEW
+                ReturnValues = ReturnValue.ALL_NEW,
             };
 
             var response = await _client.UpdateItemAsync(request);
@@ -144,10 +169,7 @@ public class ActiveGameRepository : IActiveGameRepository
     {
         try
         {
-            var config = new DynamoDBOperationConfig
-            {
-                OverrideTableName = _tableName
-            };
+            var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
             await _context.DeleteAsync<ActiveGameRecord>(gameCode, config);
             return true;

@@ -1,10 +1,10 @@
-﻿using Bogus;
-using ServerlessAPI.Entities;
-using ServerlessAPI.Repositories;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Bogus;
+using ServerlessAPI.Entities;
+using ServerlessAPI.Repositories;
 
 namespace ServerlessAPI.Tests;
 
@@ -15,9 +15,15 @@ internal class MockBookRepository : IBookRepository
     public MockBookRepository()
     {
         fakeEntity = new Faker<Book>()
-        .RuleFor(o => o.Authors, f => { return new List<string>() { f.Name.FullName(), f.Name.FullName() }; })
-        .RuleFor(o => o.CoverPage, f => f.Image.LoremPixelUrl())
-        .RuleFor(o => o.GameId, f => Guid.NewGuid());
+            .RuleFor(
+                o => o.Authors,
+                f =>
+                {
+                    return new List<string>() { f.Name.FullName(), f.Name.FullName() };
+                }
+            )
+            .RuleFor(o => o.CoverPage, f => f.Image.LoremPixelUrl())
+            .RuleFor(o => o.GameId, f => Guid.NewGuid());
     }
 
     public Task<bool> CreateAsync(Book book)

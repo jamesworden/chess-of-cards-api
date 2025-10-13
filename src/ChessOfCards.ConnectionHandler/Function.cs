@@ -6,7 +6,9 @@ using ChessOfCards.Infrastructure.Models;
 using ChessOfCards.Infrastructure.Repositories;
 using ChessOfCards.Infrastructure.Services;
 
-[assembly: LambdaSerializer(typeof(ChessOfCards.Infrastructure.Serialization.CamelCaseLambdaJsonSerializer))]
+[assembly: LambdaSerializer(
+    typeof(ChessOfCards.Infrastructure.Serialization.CamelCaseLambdaJsonSerializer)
+)]
 
 namespace ChessOfCards.ConnectionHandler;
 
@@ -22,13 +24,17 @@ public class Function
     {
         _dynamoDbClient = new AmazonDynamoDBClient();
 
-        var connectionsTableName = Environment.GetEnvironmentVariable("CONNECTIONS_TABLE_NAME")
+        var connectionsTableName =
+            Environment.GetEnvironmentVariable("CONNECTIONS_TABLE_NAME")
             ?? throw new Exception("CONNECTIONS_TABLE_NAME not set");
-        var activeGamesTableName = Environment.GetEnvironmentVariable("ACTIVE_GAMES_TABLE_NAME")
+        var activeGamesTableName =
+            Environment.GetEnvironmentVariable("ACTIVE_GAMES_TABLE_NAME")
             ?? throw new Exception("ACTIVE_GAMES_TABLE_NAME not set");
-        var gameTimersTableName = Environment.GetEnvironmentVariable("GAME_TIMERS_TABLE_NAME")
+        var gameTimersTableName =
+            Environment.GetEnvironmentVariable("GAME_TIMERS_TABLE_NAME")
             ?? throw new Exception("GAME_TIMERS_TABLE_NAME not set");
-        var websocketEndpoint = Environment.GetEnvironmentVariable("WEBSOCKET_ENDPOINT")
+        var websocketEndpoint =
+            Environment.GetEnvironmentVariable("WEBSOCKET_ENDPOINT")
             ?? throw new Exception("WEBSOCKET_ENDPOINT not set");
 
         _connectionRepository = new ConnectionRepository(_dynamoDbClient, connectionsTableName);
@@ -39,7 +45,8 @@ public class Function
 
     public async Task<APIGatewayProxyResponse> FunctionHandler(
         APIGatewayProxyRequest request,
-        ILambdaContext context)
+        ILambdaContext context
+    )
     {
         try
         {
@@ -52,7 +59,7 @@ public class Function
             {
                 "$connect" => await HandleConnectAsync(request, context),
                 "$disconnect" => await HandleDisconnectAsync(request, context),
-                _ => new APIGatewayProxyResponse { StatusCode = 400 }
+                _ => new APIGatewayProxyResponse { StatusCode = 400 },
             };
         }
         catch (Exception ex)
@@ -65,7 +72,8 @@ public class Function
 
     private async Task<APIGatewayProxyResponse> HandleConnectAsync(
         APIGatewayProxyRequest request,
-        ILambdaContext context)
+        ILambdaContext context
+    )
     {
         var connectionId = request.RequestContext.ConnectionId;
         context.Logger.LogInformation($"New connection: {connectionId}");
@@ -77,13 +85,18 @@ public class Function
 
             if (existingGame != null)
             {
-                context.Logger.LogInformation($"Player reconnected to game {existingGame.GameCode}");
+                context.Logger.LogInformation(
+                    $"Player reconnected to game {existingGame.GameCode}"
+                );
 
                 // Send reconnection success message
-                await _webSocketService.SendMessageAsync(connectionId, new WebSocketMessage(
-                    MessageTypes.PlayerReconnected,
-                    new { game = existingGame }
-                ));
+                await _webSocketService.SendMessageAsync(
+                    connectionId,
+                    new WebSocketMessage(
+                        MessageTypes.PlayerReconnected,
+                        new { game = existingGame }
+                    )
+                );
             }
             else
             {
@@ -94,10 +107,10 @@ public class Function
                 context.Logger.LogInformation($"Created connection record for {connectionId}");
 
                 // Send connected message
-                await _webSocketService.SendMessageAsync(connectionId, new WebSocketMessage(
-                    MessageTypes.Connected,
-                    new { connectionId }
-                ));
+                await _webSocketService.SendMessageAsync(
+                    connectionId,
+                    new WebSocketMessage(MessageTypes.Connected, new { connectionId })
+                );
             }
 
             return new APIGatewayProxyResponse { StatusCode = 200 };
@@ -111,7 +124,8 @@ public class Function
 
     private async Task<APIGatewayProxyResponse> HandleDisconnectAsync(
         APIGatewayProxyRequest request,
-        ILambdaContext context)
+        ILambdaContext context
+    )
     {
         var connectionId = request.RequestContext.ConnectionId;
         context.Logger.LogInformation($"Disconnection: {connectionId}");
@@ -146,9 +160,13 @@ public class Function
         }
     }
 
-    private async Task HandleGameDisconnectionAsync(ConnectionRecord connection, ILambdaContext context)
+    private async Task HandleGameDisconnectionAsync(
+        ConnectionRecord connection,
+        ILambdaContext context
+    )
     {
-        if (connection.GameCode == null) return;
+        if (connection.GameCode == null)
+            return;
 
         var game = await _gameRepository.GetByGameCodeAsync(connection.GameCode);
         if (game == null || game.HasEnded)
@@ -176,20 +194,29 @@ public class Function
         await _gameRepository.UpdateAsync(game);
 
         // Start disconnect timer (30 second grace period)
-        var disconnectTimer = GameTimerRecord.CreateDisconnectTimer(game.GameCode, playerRole, gracePeriodSeconds: 30);
+        var disconnectTimer = GameTimerRecord.CreateDisconnectTimer(
+            game.GameCode,
+            playerRole,
+            gracePeriodSeconds: 30
+        );
         await _timerRepository.CreateAsync(disconnectTimer);
 
-        context.Logger.LogInformation($"Created disconnect timer for {playerRole} in game {game.GameCode}");
+        context.Logger.LogInformation(
+            $"Created disconnect timer for {playerRole} in game {game.GameCode}"
+        );
 
         // Notify opponent
         var opponentConnectionId = isHost ? game.GuestConnectionId : game.HostConnectionId;
-        await _webSocketService.SendMessageAsync(opponentConnectionId, new WebSocketMessage(
-            MessageTypes.OpponentDisconnected,
-            new { playerRole }
-        ));
+        await _webSocketService.SendMessageAsync(
+            opponentConnectionId,
+            new WebSocketMessage(MessageTypes.OpponentDisconnected, new { playerRole })
+        );
     }
 
-    private Task<ActiveGameRecord?> TryReconnectPlayerAsync(string connectionId, ILambdaContext context)
+    private Task<ActiveGameRecord?> TryReconnectPlayerAsync(
+        string connectionId,
+        ILambdaContext context
+    )
     {
         // This is a simplified reconnection - in a real implementation, you might want to:
         // 1. Pass player identification (e.g., user ID) via query params

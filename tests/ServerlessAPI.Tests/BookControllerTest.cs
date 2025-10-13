@@ -1,10 +1,10 @@
-﻿using ServerlessAPI.Entities;
-using ServerlessAPI.Repositories;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using ServerlessAPI.Entities;
+using ServerlessAPI.Repositories;
 using Xunit;
 
 namespace ServerlessAPI.Tests;
@@ -12,18 +12,18 @@ namespace ServerlessAPI.Tests;
 public class BookControllerTest
 {
     private readonly WebApplicationFactory<Program> webApplication;
+
     public BookControllerTest()
     {
-        webApplication = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
+        webApplication = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
             {
-                builder.ConfigureServices(services =>
-                {
-                    //Mock the repository implementation
-                    //to remove infra dependencies for Test project
-                    services.AddScoped<IBookRepository, MockBookRepository>();
-                });
+                //Mock the repository implementation
+                //to remove infra dependencies for Test project
+                services.AddScoped<IBookRepository, MockBookRepository>();
             });
+        });
     }
 
     [Theory]
@@ -47,6 +47,5 @@ public class BookControllerTest
         var result = await client.GetAsync($"/api/Books?limit={limit}");
 
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, result?.StatusCode);
-
     }
 }

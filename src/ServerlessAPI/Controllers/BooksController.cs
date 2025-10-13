@@ -22,7 +22,8 @@ public class BooksController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Book>>> Get([FromQuery] int limit = 10)
     {
-        if (limit <= 0 || limit > 100) return BadRequest("The limit should been between [1-100]");
+        if (limit <= 0 || limit > 100)
+            return BadRequest("The limit should been between [1-100]");
 
         return Ok(await bookRepository.GetBooksAsync(limit));
     }
@@ -45,29 +46,27 @@ public class BooksController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Book>> Post([FromBody] Book book)
     {
-        if (book == null) return ValidationProblem("Invalid input! Book not informed");
+        if (book == null)
+            return ValidationProblem("Invalid input! Book not informed");
 
         var result = await bookRepository.CreateAsync(book);
 
         if (result)
         {
-            return CreatedAtAction(
-                nameof(Get),
-                new { id = book.GameId },
-                book);
+            return CreatedAtAction(nameof(Get), new { id = book.GameId }, book);
         }
         else
         {
             return BadRequest("Fail to persist");
         }
-
     }
 
     // PUT api/books/5
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(Guid id, [FromBody] Book book)
     {
-        if (id == Guid.Empty || book == null) return ValidationProblem("Invalid request payload");
+        if (id == Guid.Empty || book == null)
+            return ValidationProblem("Invalid request payload");
 
         // Retrieve the book.
         var bookRetrieved = await bookRepository.GetByIdAsync(id);
@@ -88,7 +87,8 @@ public class BooksController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        if (id == Guid.Empty) return ValidationProblem("Invalid request payload");
+        if (id == Guid.Empty)
+            return ValidationProblem("Invalid request payload");
 
         var bookRetrieved = await bookRepository.GetByIdAsync(id);
 

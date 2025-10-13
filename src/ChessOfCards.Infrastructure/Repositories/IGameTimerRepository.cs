@@ -20,7 +20,10 @@ public interface IGameTimerRepository
     /// <summary>
     /// Get all timers expiring before a given timestamp
     /// </summary>
-    Task<List<GameTimerRecord>> GetExpiringTimersAsync(string timerType, long expiresBeforeTimestamp);
+    Task<List<GameTimerRecord>> GetExpiringTimersAsync(
+        string timerType,
+        long expiresBeforeTimestamp
+    );
 
     /// <summary>
     /// Update an existing timer

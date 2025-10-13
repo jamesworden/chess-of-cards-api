@@ -13,7 +13,7 @@ public interface IBookRepository
     /// <param name="book">book to include</param>
     /// <returns>success/failure</returns>
     Task<bool> CreateAsync(Book book);
-    
+
     /// <summary>
     /// Remove existing book from DynamoDB Table
     /// </summary>
@@ -34,7 +34,7 @@ public interface IBookRepository
     /// <param name="id">book`s PK</param>
     /// <returns>Book object</returns>
     Task<Book?> GetByIdAsync(Guid id);
-    
+
     /// <summary>
     /// Update book content
     /// </summary>

@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessOfCards.ConnectionHand
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessOfCards.GameActionHandler", "src\ChessOfCards.GameActionHandler\ChessOfCards.GameActionHandler.csproj", "{6F277926-5B79-46D3-A614-E70E29B7F036}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessOfCards.GameActionHandler.Application", "src\ChessOfCards.GameActionHandler.Application\ChessOfCards.GameActionHandler.Application.csproj", "{C78582A8-75AA-427E-8DB1-29AA96E46B88}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessOfCards.Shared.Utilities", "src\ChessOfCards.Shared.Utilities\ChessOfCards.Shared.Utilities.csproj", "{88EDBB80-96A3-44DB-83CC-5BD0F9220E15}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,10 +36,20 @@ Global
 		{6F277926-5B79-46D3-A614-E70E29B7F036}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F277926-5B79-46D3-A614-E70E29B7F036}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F277926-5B79-46D3-A614-E70E29B7F036}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C78582A8-75AA-427E-8DB1-29AA96E46B88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C78582A8-75AA-427E-8DB1-29AA96E46B88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C78582A8-75AA-427E-8DB1-29AA96E46B88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C78582A8-75AA-427E-8DB1-29AA96E46B88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88EDBB80-96A3-44DB-83CC-5BD0F9220E15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88EDBB80-96A3-44DB-83CC-5BD0F9220E15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88EDBB80-96A3-44DB-83CC-5BD0F9220E15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88EDBB80-96A3-44DB-83CC-5BD0F9220E15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{15DEC975-9946-4417-BDD5-6B34E97D0868} = {EADB0F3A-285E-4375-B933-CD6B9BC358DF}
 		{16A68FD6-E733-4F6E-A760-9E65A84ACD37} = {EADB0F3A-285E-4375-B933-CD6B9BC358DF}
 		{6F277926-5B79-46D3-A614-E70E29B7F036} = {EADB0F3A-285E-4375-B933-CD6B9BC358DF}
+		{C78582A8-75AA-427E-8DB1-29AA96E46B88} = {EADB0F3A-285E-4375-B933-CD6B9BC358DF}
+		{88EDBB80-96A3-44DB-83CC-5BD0F9220E15} = {EADB0F3A-285E-4375-B933-CD6B9BC358DF}
 	EndGlobalSection
 EndGlobal

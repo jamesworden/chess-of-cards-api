@@ -15,19 +15,16 @@ public class GameTimerRepository : IGameTimerRepository
 
     public GameTimerRepository(IAmazonDynamoDB dynamoDbClient, string tableName)
     {
-        _context = new DynamoDBContext(dynamoDbClient, new DynamoDBContextConfig
-        {
-            TableNamePrefix = string.Empty
-        });
+        _context = new DynamoDBContext(
+            dynamoDbClient,
+            new DynamoDBContextConfig { TableNamePrefix = string.Empty }
+        );
         _tableName = tableName;
     }
 
     public async Task<GameTimerRecord> CreateAsync(GameTimerRecord timer)
     {
-        var config = new DynamoDBOperationConfig
-        {
-            OverrideTableName = _tableName
-        };
+        var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
         await _context.SaveAsync(timer, config);
         return timer;
@@ -35,15 +32,15 @@ public class GameTimerRepository : IGameTimerRepository
 
     public async Task<GameTimerRecord?> GetByIdAsync(string timerId)
     {
-        var config = new DynamoDBOperationConfig
-        {
-            OverrideTableName = _tableName
-        };
+        var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
         return await _context.LoadAsync<GameTimerRecord>(timerId, config);
     }
 
-    public async Task<List<GameTimerRecord>> GetExpiringTimersAsync(string timerType, long expiresBeforeTimestamp)
+    public async Task<List<GameTimerRecord>> GetExpiringTimersAsync(
+        string timerType,
+        long expiresBeforeTimestamp
+    )
     {
         var config = new DynamoDBOperationConfig
         {
@@ -51,8 +48,12 @@ public class GameTimerRepository : IGameTimerRepository
             IndexName = "ExpiryIndex",
             QueryFilter = new List<ScanCondition>
             {
-                new ScanCondition("expiresAt", ScanOperator.LessThanOrEqual, expiresBeforeTimestamp)
-            }
+                new ScanCondition(
+                    "expiresAt",
+                    ScanOperator.LessThanOrEqual,
+                    expiresBeforeTimestamp
+                ),
+            },
         };
 
         var search = _context.QueryAsync<GameTimerRecord>(timerType, config);
@@ -61,10 +62,7 @@ public class GameTimerRepository : IGameTimerRepository
 
     public async Task<GameTimerRecord> UpdateAsync(GameTimerRecord timer)
     {
-        var config = new DynamoDBOperationConfig
-        {
-            OverrideTableName = _tableName
-        };
+        var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
         await _context.SaveAsync(timer, config);
         return timer;
@@ -74,10 +72,7 @@ public class GameTimerRepository : IGameTimerRepository
     {
         try
         {
-            var config = new DynamoDBOperationConfig
-            {
-                OverrideTableName = _tableName
-            };
+            var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
             await _context.DeleteAsync<GameTimerRecord>(timerId, config);
             return true;
@@ -93,16 +88,13 @@ public class GameTimerRepository : IGameTimerRepository
         try
         {
             // Query all timers with IDs starting with this game code
-            var config = new DynamoDBOperationConfig
-            {
-                OverrideTableName = _tableName
-            };
+            var config = new DynamoDBOperationConfig { OverrideTableName = _tableName };
 
             // Scan for timers matching this game code (not ideal but works for cleanup)
             var search = _context.ScanAsync<GameTimerRecord>(
                 new List<ScanCondition>
                 {
-                    new ScanCondition("gameCode", ScanOperator.Equal, gameCode)
+                    new ScanCondition("gameCode", ScanOperator.Equal, gameCode),
                 },
                 config
             );

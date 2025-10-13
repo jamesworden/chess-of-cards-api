@@ -13,9 +13,7 @@ public class WebSocketMessage
     [JsonPropertyName("data")]
     public object? Data { get; set; }
 
-    public WebSocketMessage()
-    {
-    }
+    public WebSocketMessage() { }
 
     public WebSocketMessage(string type, object? data = null)
     {
@@ -32,9 +30,7 @@ public class WebSocketMessage<T> : WebSocketMessage
     [JsonPropertyName("data")]
     public new T? Data { get; set; }
 
-    public WebSocketMessage()
-    {
-    }
+    public WebSocketMessage() { }
 
     public WebSocketMessage(string type, T? data = default)
     {

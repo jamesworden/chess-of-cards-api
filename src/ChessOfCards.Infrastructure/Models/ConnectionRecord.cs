@@ -27,9 +27,7 @@ public class ConnectionRecord
     [DynamoDBProperty("ttl")]
     public long Ttl { get; set; } // Auto-expire after 24 hours
 
-    public ConnectionRecord()
-    {
-    }
+    public ConnectionRecord() { }
 
     public ConnectionRecord(string connectionId, string? playerName = null)
     {
