@@ -14,7 +14,12 @@
       "Bash(mkdir:*)",
       "Bash(rm:*)",
       "Bash(dotnet add:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(sam local:*)",
+      "Bash(where sam)",
+      "Bash(\"C:\\Program Files\\Amazon\\AWSSAMCLI\\bin\\sam.cmd\" local start-api)",
+      "Bash(docker:*)",
+      "Bash(aws cloudformation describe-stacks:*)"
     ],
     "deny": [],
     "ask": []
