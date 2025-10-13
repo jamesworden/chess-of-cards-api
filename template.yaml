@@ -58,7 +58,7 @@ Resources:
   ConnectionHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./src/ChessOfCards.ConnectionHandler/
+      CodeUri: ./src/
       Handler: ChessOfCards.ConnectionHandler::ChessOfCards.ConnectionHandler.Function::FunctionHandler
       Description: Handles WebSocket connections and disconnections
       Environment:
@@ -83,7 +83,7 @@ Resources:
   GameActionHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./src/ChessOfCards.GameActionHandler/
+      CodeUri: ./src/
       Handler: ChessOfCards.GameActionHandler::ChessOfCards.GameActionHandler.Function::FunctionHandler
       Description: Handles game actions (move, pass, resign, etc.)
       Timeout: 60
