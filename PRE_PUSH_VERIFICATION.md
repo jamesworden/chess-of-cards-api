@@ -179,10 +179,12 @@ Before pushing to public GitHub:
 
 - [x] ✅ Verify no sensitive data in repository
 - [x] ✅ Verify environment separation exists
+- [x] ✅ Remove legacy REST API from template.yaml
+- [x] ✅ Add legacy folder to .gitignore
+- [x] ✅ Configure workflow to use --resolve-s3 (auto-creates S3 bucket)
+- [x] ✅ Set AWS region to us-east-1 throughout workflow
 - [ ] ⚠️ Create GitHub environment `dev` with AWS secrets
 - [ ] ⚠️ Create GitHub environment `prod` with AWS secrets
-- [ ] ⚠️ Configure S3 bucket for deployments (or modify workflow to use --resolve-s3)
-- [ ] ⚠️ Verify AWS region in workflow matches target region
 
 ## Deployment Testing Plan
 
