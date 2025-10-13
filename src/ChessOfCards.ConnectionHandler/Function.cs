@@ -6,7 +6,7 @@ using ChessOfCards.Infrastructure.Models;
 using ChessOfCards.Infrastructure.Repositories;
 using ChessOfCards.Infrastructure.Services;
 
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
+[assembly: LambdaSerializer(typeof(ChessOfCards.Infrastructure.Serialization.CamelCaseLambdaJsonSerializer))]
 
 namespace ChessOfCards.ConnectionHandler;
 
