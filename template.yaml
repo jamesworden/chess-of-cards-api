@@ -1,27 +1,346 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  Sample SAM Template for chess-of-cards-api
+  Chess of Cards - Serverless WebSocket API
 
-# 1. New Parameter for Environment
 Parameters:
   Environment:
     Type: String
-    Default: dev # Set a default for convenience
+    Default: dev
     AllowedValues:
       - dev
       - prod
     Description: Environment name (e.g., dev or prod)
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 100
-
-    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    Timeout: 30
+    Runtime: dotnet8
+    MemorySize: 512
     LoggingConfig:
       LogFormat: JSON
+    Environment:
+      Variables:
+        ENVIRONMENT_NAME: !Ref Environment
+        CONNECTIONS_TABLE_NAME: !Ref ConnectionsTable
+        PENDING_GAMES_TABLE_NAME: !Ref PendingGamesTable
+        ACTIVE_GAMES_TABLE_NAME: !Ref ActiveGamesTable
+        GAME_TIMERS_TABLE_NAME: !Ref GameTimersTable
+
 Resources:
+  # ========================================
+  # WebSocket API
+  # ========================================
+  ChessWebSocketApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub "chess-of-cards-websocket-${Environment}"
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.action"
+
+  # WebSocket Stages
+  WebSocketStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref ChessWebSocketApi
+      StageName: !Ref Environment
+      AutoDeploy: true
+      DefaultRouteSettings:
+        LoggingLevel: INFO
+        DataTraceEnabled: true
+        DetailedMetricsEnabled: true
+
+  # ========================================
+  # Lambda Functions
+  # ========================================
+
+  # Connection Handler
+  ConnectionHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/ChessOfCards.ConnectionHandler/
+      Handler: ChessOfCards.ConnectionHandler::ChessOfCards.ConnectionHandler.Function::FunctionHandler
+      Description: Handles WebSocket connections and disconnections
+      Environment:
+        Variables:
+          WEBSOCKET_ENDPOINT: !Sub "https://${ChessWebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ConnectionsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ActiveGamesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref GameTimersTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - execute-api:ManageConnections
+              Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/${Environment}/*"
+
+  # Game Action Handler
+  GameActionHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/ChessOfCards.GameActionHandler/
+      Handler: ChessOfCards.GameActionHandler::ChessOfCards.GameActionHandler.Function::FunctionHandler
+      Description: Handles game actions (move, pass, resign, etc.)
+      Timeout: 60
+      MemorySize: 1024
+      Environment:
+        Variables:
+          WEBSOCKET_ENDPOINT: !Sub "https://${ChessWebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ConnectionsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PendingGamesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ActiveGamesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref GameTimersTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - execute-api:ManageConnections
+              Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/${Environment}/*"
+
+  # Timer Handler
+  TimerHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/ChessOfCards.TimerHandler/
+      Handler: ChessOfCards.TimerHandler::ChessOfCards.TimerHandler.Function::FunctionHandler
+      Description: Processes expired game timers
+      Timeout: 60
+      Environment:
+        Variables:
+          WEBSOCKET_ENDPOINT: !Sub "https://${ChessWebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ConnectionsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ActiveGamesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref GameTimersTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - execute-api:ManageConnections
+              Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/${Environment}/*"
+      Events:
+        TimerCheck:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 minute)
+            Description: Check for expired game timers every minute
+            Enabled: true
+
+  # ========================================
+  # WebSocket Routes
+  # ========================================
+
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChessWebSocketApi
+      RouteKey: $connect
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${ConnectIntegration}"
+
+  ConnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ChessWebSocketApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ConnectionHandlerFunction.Arn}/invocations"
+
+  ConnectPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ConnectionHandlerFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/*/$connect"
+
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChessWebSocketApi
+      RouteKey: $disconnect
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${DisconnectIntegration}"
+
+  DisconnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ChessWebSocketApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ConnectionHandlerFunction.Arn}/invocations"
+
+  DisconnectPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ConnectionHandlerFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/*/$disconnect"
+
+  DefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ChessWebSocketApi
+      RouteKey: $default
+      AuthorizationType: NONE
+      Target: !Sub "integrations/${DefaultIntegration}"
+
+  DefaultIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ChessWebSocketApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GameActionHandlerFunction.Arn}/invocations"
+
+  DefaultPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GameActionHandlerFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/*/$default"
+
+  # ========================================
+  # DynamoDB Tables
+  # ========================================
+
+  ConnectionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "chess-of-cards-connections-${Environment}"
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      AttributeDefinitions:
+        - AttributeName: connectionId
+          AttributeType: S
+        - AttributeName: gameCode
+          AttributeType: S
+      KeySchema:
+        - AttributeName: connectionId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: GameCodeIndex
+          KeySchema:
+            - AttributeName: gameCode
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  PendingGamesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "chess-of-cards-pending-games-${Environment}"
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      AttributeDefinitions:
+        - AttributeName: gameCode
+          AttributeType: S
+        - AttributeName: hostConnectionId
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: N
+      KeySchema:
+        - AttributeName: gameCode
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: HostConnectionIndex
+          KeySchema:
+            - AttributeName: hostConnectionId
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  ActiveGamesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "chess-of-cards-active-games-${Environment}"
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      AttributeDefinitions:
+        - AttributeName: gameCode
+          AttributeType: S
+        - AttributeName: hostConnectionId
+          AttributeType: S
+        - AttributeName: guestConnectionId
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: N
+      KeySchema:
+        - AttributeName: gameCode
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: HostConnectionIndex
+          KeySchema:
+            - AttributeName: hostConnectionId
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: GuestConnectionIndex
+          KeySchema:
+            - AttributeName: guestConnectionId
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  GameTimersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "chess-of-cards-game-timers-${Environment}"
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      AttributeDefinitions:
+        - AttributeName: timerId
+          AttributeType: S
+        - AttributeName: timerType
+          AttributeType: S
+        - AttributeName: expiresAt
+          AttributeType: N
+      KeySchema:
+        - AttributeName: timerId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: ExpiryIndex
+          KeySchema:
+            - AttributeName: timerType
+              KeyType: HASH
+            - AttributeName: expiresAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  # ========================================
+  # Old Resources (keep for now)
+  # ========================================
   NetCodeWebAPIServerless:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -72,10 +391,10 @@ Resources:
     Type: AWS::ResourceGroups::Group
     Properties:
       Name:
-        # 3. Update ApplicationInsights name to include the Environment parameter
         Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}-${Environment}
       ResourceQuery:
         Type: CLOUDFORMATION_STACK_1_0
+
   ApplicationInsightsMonitoring:
     Type: AWS::ApplicationInsights::Application
     Properties:
@@ -84,6 +403,29 @@ Resources:
       AutoConfigurationEnabled: "true"
 
 Outputs:
+  WebSocketApiEndpoint:
+    Description: WebSocket API endpoint URL
+    Value: !Sub "wss://${ChessWebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+    Export:
+      Name: !Sub "${AWS::StackName}-WebSocketEndpoint"
+
+  ConnectionsTableName:
+    Description: Connections DynamoDB table name
+    Value: !Ref ConnectionsTable
+
+  PendingGamesTableName:
+    Description: Pending Games DynamoDB table name
+    Value: !Ref PendingGamesTable
+
+  ActiveGamesTableName:
+    Description: Active Games DynamoDB table name
+    Value: !Ref ActiveGamesTable
+
+  GameTimersTableName:
+    Description: Game Timers DynamoDB table name
+    Value: !Ref GameTimersTable
+
+  # Legacy outputs (keep for compatibility)
   WebEndpoint:
-    Description: API Gateway endpoint URL
+    Description: Legacy REST API Gateway endpoint URL
     Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"

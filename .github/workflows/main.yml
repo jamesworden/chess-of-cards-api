@@ -57,7 +57,7 @@ jobs:
           # Assumes you have Dev keys configured as secrets in the 'dev' environment
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # <-- ACTION NEEDED: Confirm this is your target AWS region
+          aws-region: us-east-1
 
       - name: SAM Deploy to Development
         run: |
@@ -65,9 +65,10 @@ jobs:
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --stack-name ChessOfCardsApi-Dev \
-            --s3-bucket chess-of-cards-api-artifacts \
+            --resolve-s3 \
             --capabilities CAPABILITY_IAM \
-            --parameter-overrides Environment=dev
+            --parameter-overrides Environment=dev \
+            --region us-east-1
 
   # 3. PRODUCTION DEPLOYMENT JOB: Runs only when pushing to 'main'
   deploy_prod:
@@ -91,7 +92,7 @@ jobs:
           # Assumes you have Prod keys configured as secrets in the 'production' environment
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # <-- ACTION NEEDED: Confirm this is your target AWS region
+          aws-region: us-east-1
 
       - name: SAM Deploy to Production
         run: |
@@ -99,6 +100,7 @@ jobs:
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --stack-name ChessOfCardsApi-Prod \
-            --s3-bucket chess-of-cards-api-artifacts \
+            --resolve-s3 \
             --capabilities CAPABILITY_IAM \
-            --parameter-overrides Environment=prod
+            --parameter-overrides Environment=prod \
+            --region us-east-1
