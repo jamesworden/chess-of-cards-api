@@ -39,7 +39,7 @@ public class CreatePendingGameCommandHandler(
                 return;
             }
 
-            // Generate game code (6 character alphanumeric)
+            // Generate game code (4 character alphanumeric)
             var gameCode = GenerateGameCode();
 
             // Create pending game record
@@ -92,7 +92,7 @@ public class CreatePendingGameCommandHandler(
         const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Exclude similar looking characters
         var random = new Random();
         return new string(
-            Enumerable.Repeat(chars, 6).Select(s => s[random.Next(s.Length)]).ToArray()
+            Enumerable.Repeat(chars, 4).Select(s => s[random.Next(s.Length)]).ToArray()
         );
     }
 
