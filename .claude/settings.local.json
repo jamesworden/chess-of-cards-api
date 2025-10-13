@@ -7,7 +7,11 @@
       "Bash(dotnet clean:*)",
       "Bash(dotnet build:*)",
       "Bash(dotnet sln:*)",
-      "Bash(dotnet sln ChessOfCards.sln add src/ChessOfCards.GameActionHandler/ChessOfCards.GameActionHandler.csproj)"
+      "Bash(dotnet sln ChessOfCards.sln add src/ChessOfCards.GameActionHandler/ChessOfCards.GameActionHandler.csproj)",
+      "Bash(dotnet tool list)",
+      "Bash(dotnet tool install:*)",
+      "Bash(dotnet csharpier:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

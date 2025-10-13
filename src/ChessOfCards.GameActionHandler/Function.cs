@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Amazon.DynamoDBv2;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
@@ -5,9 +6,10 @@ using ChessOfCards.Infrastructure.Messages;
 using ChessOfCards.Infrastructure.Models;
 using ChessOfCards.Infrastructure.Repositories;
 using ChessOfCards.Infrastructure.Services;
-using System.Text.Json;
 
-[assembly: LambdaSerializer(typeof(ChessOfCards.Infrastructure.Serialization.CamelCaseLambdaJsonSerializer))]
+[assembly: LambdaSerializer(
+    typeof(ChessOfCards.Infrastructure.Serialization.CamelCaseLambdaJsonSerializer)
+)]
 
 namespace ChessOfCards.GameActionHandler;
 
@@ -24,15 +26,20 @@ public class Function
     {
         _dynamoDbClient = new AmazonDynamoDBClient();
 
-        var connectionsTableName = Environment.GetEnvironmentVariable("CONNECTIONS_TABLE_NAME")
+        var connectionsTableName =
+            Environment.GetEnvironmentVariable("CONNECTIONS_TABLE_NAME")
             ?? throw new Exception("CONNECTIONS_TABLE_NAME not set");
-        var pendingGamesTableName = Environment.GetEnvironmentVariable("PENDING_GAMES_TABLE_NAME")
+        var pendingGamesTableName =
+            Environment.GetEnvironmentVariable("PENDING_GAMES_TABLE_NAME")
             ?? throw new Exception("PENDING_GAMES_TABLE_NAME not set");
-        var activeGamesTableName = Environment.GetEnvironmentVariable("ACTIVE_GAMES_TABLE_NAME")
+        var activeGamesTableName =
+            Environment.GetEnvironmentVariable("ACTIVE_GAMES_TABLE_NAME")
             ?? throw new Exception("ACTIVE_GAMES_TABLE_NAME not set");
-        var gameTimersTableName = Environment.GetEnvironmentVariable("GAME_TIMERS_TABLE_NAME")
+        var gameTimersTableName =
+            Environment.GetEnvironmentVariable("GAME_TIMERS_TABLE_NAME")
             ?? throw new Exception("GAME_TIMERS_TABLE_NAME not set");
-        var websocketEndpoint = Environment.GetEnvironmentVariable("WEBSOCKET_ENDPOINT")
+        var websocketEndpoint =
+            Environment.GetEnvironmentVariable("WEBSOCKET_ENDPOINT")
             ?? throw new Exception("WEBSOCKET_ENDPOINT not set");
 
         _connectionRepository = new ConnectionRepository(_dynamoDbClient, connectionsTableName);
@@ -44,7 +51,8 @@ public class Function
 
     public async Task<APIGatewayProxyResponse> FunctionHandler(
         APIGatewayProxyRequest request,
-        ILambdaContext context)
+        ILambdaContext context
+    )
     {
         try
         {
@@ -65,10 +73,14 @@ public class Function
             // Route to appropriate handler
             var response = actionRequest.Action switch
             {
-                "createPendingGame" => await HandleCreatePendingGameAsync(connectionId, actionRequest.Data, context),
+                "createPendingGame" => await HandleCreatePendingGameAsync(
+                    connectionId,
+                    actionRequest.Data,
+                    context
+                ),
                 "joinGame" => await HandleJoinGameAsync(connectionId, actionRequest.Data, context),
                 "deletePendingGame" => await HandleDeletePendingGameAsync(connectionId, context),
-                _ => await HandleUnknownActionAsync(connectionId, actionRequest.Action, context)
+                _ => await HandleUnknownActionAsync(connectionId, actionRequest.Action, context),
             };
 
             return response;
@@ -84,7 +96,8 @@ public class Function
     private async Task<APIGatewayProxyResponse> HandleCreatePendingGameAsync(
         string connectionId,
         object? data,
-        ILambdaContext context)
+        ILambdaContext context
+    )
     {
         try
         {
@@ -102,13 +115,18 @@ public class Function
             context.Logger.LogInformation($"Creating pending game for {connectionId}");
 
             // Validate game name
-            if (!string.IsNullOrWhiteSpace(requestData.HostName) &&
-                ContainsBadWords(requestData.HostName))
+            if (
+                !string.IsNullOrWhiteSpace(requestData.HostName)
+                && ContainsBadWords(requestData.HostName)
+            )
             {
-                await _webSocketService.SendMessageAsync(connectionId, new WebSocketMessage(
-                    MessageTypes.GameNameInvalid,
-                    new { reason = "Name contains inappropriate content" }
-                ));
+                await _webSocketService.SendMessageAsync(
+                    connectionId,
+                    new WebSocketMessage(
+                        MessageTypes.GameNameInvalid,
+                        new { reason = "Name contains inappropriate content" }
+                    )
+                );
                 return new APIGatewayProxyResponse { StatusCode = 200 };
             }
 
@@ -138,15 +156,18 @@ public class Function
             context.Logger.LogInformation($"Created pending game {gameCode}");
 
             // Send response to client
-            await _webSocketService.SendMessageAsync(connectionId, new WebSocketMessage(
-                MessageTypes.CreatedPendingGame,
-                new
-                {
-                    gameCode,
-                    durationOption = pendingGame.DurationOption,
-                    hostName = pendingGame.HostName
-                }
-            ));
+            await _webSocketService.SendMessageAsync(
+                connectionId,
+                new WebSocketMessage(
+                    MessageTypes.CreatedPendingGame,
+                    new
+                    {
+                        gameCode,
+                        durationOption = pendingGame.DurationOption,
+                        hostName = pendingGame.HostName,
+                    }
+                )
+            );
 
             return new APIGatewayProxyResponse { StatusCode = 200 };
         }
@@ -161,7 +182,8 @@ public class Function
     private async Task<APIGatewayProxyResponse> HandleJoinGameAsync(
         string connectionId,
         object? data,
-        ILambdaContext context)
+        ILambdaContext context
+    )
     {
         try
         {
@@ -179,24 +201,34 @@ public class Function
             context.Logger.LogInformation($"Player joining game {requestData.GameCode}");
 
             // Validate guest name
-            if (!string.IsNullOrWhiteSpace(requestData.GuestName) &&
-                ContainsBadWords(requestData.GuestName))
+            if (
+                !string.IsNullOrWhiteSpace(requestData.GuestName)
+                && ContainsBadWords(requestData.GuestName)
+            )
             {
-                await _webSocketService.SendMessageAsync(connectionId, new WebSocketMessage(
-                    MessageTypes.GameNameInvalid,
-                    new { reason = "Name contains inappropriate content" }
-                ));
+                await _webSocketService.SendMessageAsync(
+                    connectionId,
+                    new WebSocketMessage(
+                        MessageTypes.GameNameInvalid,
+                        new { reason = "Name contains inappropriate content" }
+                    )
+                );
                 return new APIGatewayProxyResponse { StatusCode = 200 };
             }
 
             // Find pending game
-            var pendingGame = await _pendingGameRepository.GetByGameCodeAsync(requestData.GameCode.ToUpper());
+            var pendingGame = await _pendingGameRepository.GetByGameCodeAsync(
+                requestData.GameCode.ToUpper()
+            );
             if (pendingGame == null)
             {
-                await _webSocketService.SendMessageAsync(connectionId, new WebSocketMessage(
-                    MessageTypes.JoinGameCodeInvalid,
-                    new { gameCode = requestData.GameCode }
-                ));
+                await _webSocketService.SendMessageAsync(
+                    connectionId,
+                    new WebSocketMessage(
+                        MessageTypes.JoinGameCodeInvalid,
+                        new { gameCode = requestData.GameCode }
+                    )
+                );
                 return new APIGatewayProxyResponse { StatusCode = 200 };
             }
 
@@ -246,11 +278,14 @@ public class Function
                     hostName = activeGame.HostName,
                     guestName = activeGame.GuestName,
                     durationOption = activeGame.DurationOption,
-                    isHostPlayersTurn = activeGame.IsHostPlayersTurn
+                    isHostPlayersTurn = activeGame.IsHostPlayersTurn,
                 }
             );
 
-            await _webSocketService.SendMessageAsync(pendingGame.HostConnectionId, gameStartedMessage);
+            await _webSocketService.SendMessageAsync(
+                pendingGame.HostConnectionId,
+                gameStartedMessage
+            );
             await _webSocketService.SendMessageAsync(connectionId, gameStartedMessage);
 
             return new APIGatewayProxyResponse { StatusCode = 200 };
@@ -265,7 +300,8 @@ public class Function
 
     private async Task<APIGatewayProxyResponse> HandleDeletePendingGameAsync(
         string connectionId,
-        ILambdaContext context)
+        ILambdaContext context
+    )
     {
         try
         {
@@ -306,7 +342,8 @@ public class Function
     private async Task<APIGatewayProxyResponse> HandleUnknownActionAsync(
         string connectionId,
         string action,
-        ILambdaContext context)
+        ILambdaContext context
+    )
     {
         context.Logger.LogWarning($"Unknown action: {action}");
         await SendErrorAsync(connectionId, $"Unknown action: {action}");
@@ -315,19 +352,19 @@ public class Function
 
     private async Task SendErrorAsync(string connectionId, string message)
     {
-        await _webSocketService.SendMessageAsync(connectionId, new WebSocketMessage(
-            MessageTypes.Error,
-            new { error = message }
-        ));
+        await _webSocketService.SendMessageAsync(
+            connectionId,
+            new WebSocketMessage(MessageTypes.Error, new { error = message })
+        );
     }
 
     private string GenerateGameCode()
     {
         const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Exclude similar looking characters
         var random = new Random();
-        return new string(Enumerable.Repeat(chars, 6)
-            .Select(s => s[random.Next(s.Length)])
-            .ToArray());
+        return new string(
+            Enumerable.Repeat(chars, 6).Select(s => s[random.Next(s.Length)]).ToArray()
+        );
     }
 
     private bool ContainsBadWords(string text)
