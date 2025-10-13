@@ -104,36 +104,36 @@ Resources:
                 - execute-api:ManageConnections
               Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/${Environment}/*"
 
-  # Timer Handler
-  TimerHandlerFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: ./src/ChessOfCards.TimerHandler/
-      Handler: ChessOfCards.TimerHandler::ChessOfCards.TimerHandler.Function::FunctionHandler
-      Description: Processes expired game timers
-      Timeout: 60
-      Environment:
-        Variables:
-          WEBSOCKET_ENDPOINT: !Sub "https://${ChessWebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref ConnectionsTable
-        - DynamoDBCrudPolicy:
-            TableName: !Ref ActiveGamesTable
-        - DynamoDBCrudPolicy:
-            TableName: !Ref GameTimersTable
-        - Statement:
-            - Effect: Allow
-              Action:
-                - execute-api:ManageConnections
-              Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/${Environment}/*"
-      Events:
-        TimerCheck:
-          Type: Schedule
-          Properties:
-            Schedule: rate(1 minute)
-            Description: Check for expired game timers every minute
-            Enabled: true
+  # Timer Handler - TODO: Implement in Phase 5
+  # TimerHandlerFunction:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     CodeUri: ./src/ChessOfCards.TimerHandler/
+  #     Handler: ChessOfCards.TimerHandler::ChessOfCards.TimerHandler.Function::FunctionHandler
+  #     Description: Processes expired game timers
+  #     Timeout: 60
+  #     Environment:
+  #       Variables:
+  #         WEBSOCKET_ENDPOINT: !Sub "https://${ChessWebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+  #     Policies:
+  #       - DynamoDBCrudPolicy:
+  #           TableName: !Ref ConnectionsTable
+  #       - DynamoDBCrudPolicy:
+  #           TableName: !Ref ActiveGamesTable
+  #       - DynamoDBCrudPolicy:
+  #           TableName: !Ref GameTimersTable
+  #       - Statement:
+  #           - Effect: Allow
+  #             Action:
+  #               - execute-api:ManageConnections
+  #             Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ChessWebSocketApi}/${Environment}/*"
+  #     Events:
+  #       TimerCheck:
+  #         Type: Schedule
+  #         Properties:
+  #           Schedule: rate(1 minute)
+  #           Description: Check for expired game timers every minute
+  #           Enabled: true
 
   # ========================================
   # WebSocket Routes

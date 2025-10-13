@@ -3,7 +3,9 @@
     "allow": [
       "Bash(dotnet new:*)",
       "Bash(sam validate:*)",
-      "Bash(dotnet build)"
+      "Bash(dotnet build)",
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet build:*)"
     ],
     "deny": [],
     "ask": []

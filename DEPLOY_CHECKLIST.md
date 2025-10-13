@@ -94,7 +94,7 @@ Follow the complete test plan in `TESTING_GUIDE.md`:
 - ✅ Game joining works
 - ❌ Cannot play moves yet (Phase 3)
 - ❌ Game state is empty JSON (Phase 3)
-- ❌ Timers created but not processed (Phase 5)
+- ❌ Timer handler not deployed yet (Phase 5) - TimerHandler commented out in template.yaml
 - ❌ Reconnection stubbed out (Phase 6)
 
 ## Troubleshooting
