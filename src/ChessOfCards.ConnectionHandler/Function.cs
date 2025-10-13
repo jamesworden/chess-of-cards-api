@@ -189,7 +189,7 @@ public class Function
         ));
     }
 
-    private async Task<ActiveGameRecord?> TryReconnectPlayerAsync(string connectionId, ILambdaContext context)
+    private Task<ActiveGameRecord?> TryReconnectPlayerAsync(string connectionId, ILambdaContext context)
     {
         // This is a simplified reconnection - in a real implementation, you might want to:
         // 1. Pass player identification (e.g., user ID) via query params
@@ -199,6 +199,6 @@ public class Function
         // For now, we'll return null (no reconnection support in this initial implementation)
         // This will be implemented when we add authentication
 
-        return null;
+        return Task.FromResult<ActiveGameRecord?>(null);
     }
 }
