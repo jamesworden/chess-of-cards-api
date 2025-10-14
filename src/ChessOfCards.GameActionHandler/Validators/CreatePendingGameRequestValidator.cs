@@ -1,3 +1,4 @@
+using ChessOfCards.Domain.Features.Games.Constants;
 using ChessOfCards.GameActionHandler.Requests;
 using FluentValidation;
 
@@ -10,7 +11,7 @@ public class CreatePendingGameRequestValidator : AbstractValidator<CreatePending
         RuleFor(x => x.DurationOption)
             .Must(BeValidDurationOption)
             .When(x => !string.IsNullOrWhiteSpace(x.DurationOption))
-            .WithMessage("DurationOption must be one of: SHORT, MEDIUM, LONG");
+            .WithMessage($"DurationOption must be one of: {string.Join(", ", DurationOptionConstants.ValidOptions)}");
 
         RuleFor(x => x.HostName)
             .MaximumLength(50)
@@ -23,7 +24,6 @@ public class CreatePendingGameRequestValidator : AbstractValidator<CreatePending
         if (string.IsNullOrWhiteSpace(durationOption))
             return true;
 
-        var validOptions = new[] { "SHORT", "MEDIUM", "LONG" };
-        return validOptions.Contains(durationOption.ToUpper());
+        return DurationOptionConstants.ValidOptions.Contains(durationOption, StringComparer.OrdinalIgnoreCase);
     }
 }

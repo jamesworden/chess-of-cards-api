@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2.DataModel;
+using ChessOfCards.Domain.Features.Games.Constants;
 
 namespace ChessOfCards.Infrastructure.Models;
 
@@ -38,7 +39,7 @@ public class ActiveGameRecord
     public string WonBy { get; set; } = "NONE"; // HOST, GUEST, NONE
 
     [DynamoDBProperty("durationOption")]
-    public string DurationOption { get; set; } = "MEDIUM";
+    public string DurationOption { get; set; } = DurationOptionConstants.Default;
 
     [DynamoDBProperty("createdAt")]
     [DynamoDBGlobalSecondaryIndexRangeKey("HostConnectionIndex", "GuestConnectionIndex")]

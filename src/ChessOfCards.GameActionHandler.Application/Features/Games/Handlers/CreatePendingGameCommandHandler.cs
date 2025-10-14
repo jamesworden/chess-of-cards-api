@@ -1,3 +1,4 @@
+using ChessOfCards.Domain.Features.Games.Constants;
 using ChessOfCards.GameActionHandler.Application.Features.Games.Commands;
 using ChessOfCards.Infrastructure.Messages;
 using ChessOfCards.Infrastructure.Models;
@@ -46,7 +47,7 @@ public class CreatePendingGameCommandHandler(
             var pendingGame = new PendingGameRecord(
                 gameCode,
                 command.ConnectionId,
-                command.DurationOption ?? "MEDIUM",
+                command.DurationOption ?? DurationOptionConstants.Default,
                 command.HostName
             );
 

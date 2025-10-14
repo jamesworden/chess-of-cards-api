@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2.DataModel;
+using ChessOfCards.Domain.Features.Games.Constants;
 
 namespace ChessOfCards.Infrastructure.Models;
 
@@ -19,7 +20,7 @@ public class PendingGameRecord
     public string? HostName { get; set; }
 
     [DynamoDBProperty("durationOption")]
-    public string DurationOption { get; set; } = "MEDIUM"; // SHORT, MEDIUM, LONG
+    public string DurationOption { get; set; } = DurationOptionConstants.Default;
 
     [DynamoDBProperty("createdAt")]
     [DynamoDBGlobalSecondaryIndexRangeKey("HostConnectionIndex")]
