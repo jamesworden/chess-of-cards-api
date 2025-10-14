@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2;
+using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using ChessOfCards.Infrastructure.Repositories;
 using ChessOfCards.Infrastructure.Services;
 
@@ -11,7 +12,17 @@ public static class ServiceConfiguration
 {
     public static ServiceDependencies ConfigureServices()
     {
-        var dynamoDbClient = new AmazonDynamoDBClient();
+        // Register X-Ray tracing for all AWS SDK calls
+        AWSSDKHandler.RegisterXRayForAllServices();
+
+        // Configure DynamoDB client with connection pooling for better performance
+        var config = new AmazonDynamoDBConfig
+        {
+            MaxConnectionsPerServer = 50, // Enable connection pooling for better performance
+            Timeout = TimeSpan.FromSeconds(10), // Reasonable timeout for connection operations
+            MaxErrorRetry = 3 // Built-in retry logic for transient errors
+        };
+        var dynamoDbClient = new AmazonDynamoDBClient(config);
 
         // Get environment variables
         var connectionsTableName =

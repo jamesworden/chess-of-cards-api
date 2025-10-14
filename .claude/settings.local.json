@@ -19,7 +19,9 @@
       "Bash(where sam)",
       "Bash(\"C:\\Program Files\\Amazon\\AWSSAMCLI\\bin\\sam.cmd\" local start-api)",
       "Bash(docker:*)",
-      "Bash(aws cloudformation describe-stacks:*)"
+      "Bash(aws cloudformation describe-stacks:*)",
+      "WebSearch",
+      "WebFetch(domain:aws.amazon.com)"
     ],
     "deny": [],
     "ask": []

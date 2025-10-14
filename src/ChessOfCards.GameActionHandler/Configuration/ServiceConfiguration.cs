@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2;
+using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using ChessOfCards.GameActionHandler.Application.Features.Games.Commands;
 using ChessOfCards.Infrastructure.Repositories;
 using ChessOfCards.Infrastructure.Services;
@@ -15,6 +16,9 @@ public static class ServiceConfiguration
 {
     public static IServiceProvider ConfigureServices()
     {
+        // Register X-Ray tracing for all AWS SDK calls
+        AWSSDKHandler.RegisterXRayForAllServices();
+
         var services = new ServiceCollection();
 
         // Add logging
@@ -42,8 +46,17 @@ public static class ServiceConfiguration
             Environment.GetEnvironmentVariable("WEBSOCKET_ENDPOINT")
             ?? throw new Exception("WEBSOCKET_ENDPOINT not set");
 
-        // Register AWS services
-        services.AddSingleton<IAmazonDynamoDB>(_ => new AmazonDynamoDBClient());
+        // Register AWS services with connection pooling
+        services.AddSingleton<IAmazonDynamoDB>(_ =>
+        {
+            var config = new AmazonDynamoDBConfig
+            {
+                MaxConnectionsPerServer = 50, // Enable connection pooling for better performance
+                Timeout = TimeSpan.FromSeconds(10), // Reasonable timeout for game operations
+                MaxErrorRetry = 3 // Built-in retry logic for transient errors
+            };
+            return new AmazonDynamoDBClient(config);
+        });
 
         // Register repositories
         services.AddScoped<IConnectionRepository>(sp => new ConnectionRepository(

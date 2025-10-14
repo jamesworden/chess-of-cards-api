@@ -16,15 +16,20 @@ namespace ChessOfCards.GameActionHandler;
 
 public class Function
 {
-    private readonly ActionDispatcher _actionDispatcher;
+    // Static initialization - reused across Lambda invocations (container reuse)
+    private static readonly IServiceProvider ServiceProvider = ServiceConfiguration.ConfigureServices();
+    private static readonly ActionDispatcher ActionDispatcher = InitializeDispatcher();
+
+    private static ActionDispatcher InitializeDispatcher()
+    {
+        var mediator = ServiceProvider.GetRequiredService<IMediator>();
+        var webSocketService = ServiceProvider.GetRequiredService<WebSocketService>();
+        return new ActionDispatcher(mediator, webSocketService);
+    }
 
     public Function()
     {
-        var serviceProvider = ServiceConfiguration.ConfigureServices();
-        var mediator = serviceProvider.GetRequiredService<IMediator>();
-        var webSocketService = serviceProvider.GetRequiredService<WebSocketService>();
-
-        _actionDispatcher = new ActionDispatcher(mediator, webSocketService);
+        // Empty constructor - use static fields for Lambda container reuse
     }
 
     public async Task<APIGatewayProxyResponse> FunctionHandler(
@@ -49,7 +54,7 @@ public class Function
             context.Logger.LogInformation($"Action: {actionRequest.Action}");
 
             // Dispatch to appropriate handler using ActionDispatcher
-            await _actionDispatcher.DispatchAsync(
+            await ActionDispatcher.DispatchAsync(
                 actionRequest.Action,
                 connectionId,
                 actionRequest.Data,

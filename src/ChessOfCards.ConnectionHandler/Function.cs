@@ -11,12 +11,13 @@ namespace ChessOfCards.ConnectionHandler;
 
 public class Function
 {
-    private readonly RouteDispatcher _routeDispatcher;
+    // Static initialization - reused across Lambda invocations (container reuse)
+    private static readonly ServiceDependencies Services = ServiceConfiguration.ConfigureServices();
+    private static readonly RouteDispatcher RouteDispatcher = new RouteDispatcher(Services);
 
     public Function()
     {
-        var services = ServiceConfiguration.ConfigureServices();
-        _routeDispatcher = new RouteDispatcher(services);
+        // Empty constructor - use static fields for Lambda container reuse
     }
 
     public async Task<APIGatewayProxyResponse> FunctionHandler(
@@ -31,7 +32,7 @@ public class Function
 
             var routeKey = request.RequestContext.RouteKey;
 
-            return await _routeDispatcher.DispatchAsync(routeKey, request, context);
+            return await RouteDispatcher.DispatchAsync(routeKey, request, context);
         }
         catch (Exception ex)
         {

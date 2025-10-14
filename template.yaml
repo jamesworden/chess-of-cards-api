@@ -19,6 +19,7 @@ Globals:
     MemorySize: 512
     LoggingConfig:
       LogFormat: JSON
+    Tracing: Active  # Enable AWS X-Ray for distributed tracing
     Environment:
       Variables:
         ENVIRONMENT_NAME: !Ref Environment
