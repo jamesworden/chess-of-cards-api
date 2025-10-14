@@ -27,14 +27,14 @@ public class WebSocketService
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
     };
 
     public WebSocketService(string websocketEndpoint)
     {
         // Check if we're in local testing mode
         var isLocalMode =
-            websocketEndpoint.Contains("localhost")
-            || websocketEndpoint.Contains("127.0.0.1");
+            websocketEndpoint.Contains("localhost") || websocketEndpoint.Contains("127.0.0.1");
 
         if (isLocalMode)
         {
@@ -69,7 +69,9 @@ public class WebSocketService
         {
             // In local mode, messages are handled by the local test server
             // The LocalWebSocketServiceAdapter will handle the actual sending
-            Console.WriteLine($"[LOCAL] Message would be sent to {connectionId}: {JsonSerializer.Serialize(message, JsonOptions)}");
+            Console.WriteLine(
+                $"[LOCAL] Message would be sent to {connectionId}: {JsonSerializer.Serialize(message, JsonOptions)}"
+            );
             return true;
         }
 

@@ -3,6 +3,7 @@ using ChessOfCards.Infrastructure.Messages;
 using ChessOfCards.Infrastructure.Models;
 using ChessOfCards.Infrastructure.Repositories;
 using ChessOfCards.Infrastructure.Services;
+using ChessOfCards.Shared.Utilities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -85,7 +86,10 @@ public class JoinGameCommandHandler(
             );
 
             // Serialize game state to JSON
-            var gameStateJson = System.Text.Json.JsonSerializer.Serialize(game);
+            var gameStateJson = System.Text.Json.JsonSerializer.Serialize(
+                game,
+                JsonOptions.Default
+            );
 
             // Create active game record
             var activeGame = new ActiveGameRecord(

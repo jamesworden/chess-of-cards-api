@@ -14,10 +14,7 @@ public class LocalConnectionHandlerWrapper
     private readonly LocalWebSocketServiceAdapter _localService;
     private readonly ILogger _logger;
 
-    public LocalConnectionHandlerWrapper(
-        LocalWebSocketServiceAdapter localService,
-        ILogger logger
-    )
+    public LocalConnectionHandlerWrapper(LocalWebSocketServiceAdapter localService, ILogger logger)
     {
         _function = new ConnectionHandler.Function();
         _localService = localService;

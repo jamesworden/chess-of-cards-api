@@ -2,6 +2,7 @@ using System.Text.Json;
 using ChessOfCards.Domain.Features.Games;
 using ChessOfCards.GameActionHandler.Application.Features.Games.Commands;
 using ChessOfCards.Infrastructure.Repositories;
+using ChessOfCards.Shared.Utilities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -29,7 +30,10 @@ public class RearrangeHandCommandHandler(
             }
 
             // Deserialize game state
-            var game = JsonSerializer.Deserialize<Game>(activeGameRecord.GameState);
+            var game = JsonSerializer.Deserialize<Game>(
+                activeGameRecord.GameState,
+                JsonOptions.Default
+            );
             if (game == null)
             {
                 _logger.LogError(
@@ -42,7 +46,7 @@ public class RearrangeHandCommandHandler(
             game.RearrangeHand(command.ConnectionId, command.Cards);
 
             // Update game state in repository
-            activeGameRecord.GameState = JsonSerializer.Serialize(game);
+            activeGameRecord.GameState = JsonSerializer.Serialize(game, JsonOptions.Default);
             await _activeGameRepository.UpdateAsync(activeGameRecord);
 
             // No need to notify opponent - this is a silent client-side operation

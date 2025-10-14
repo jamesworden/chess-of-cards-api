@@ -4,6 +4,7 @@ using ChessOfCards.GameActionHandler.Application.Features.Games.Commands;
 using ChessOfCards.Infrastructure.Messages;
 using ChessOfCards.Infrastructure.Repositories;
 using ChessOfCards.Infrastructure.Services;
+using ChessOfCards.Shared.Utilities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -33,7 +34,10 @@ public class ResignGameCommandHandler(
             }
 
             // Deserialize game state
-            var game = JsonSerializer.Deserialize<Game>(activeGameRecord.GameState);
+            var game = JsonSerializer.Deserialize<Game>(
+                activeGameRecord.GameState,
+                JsonOptions.Default
+            );
             if (game == null)
             {
                 _logger.LogError(

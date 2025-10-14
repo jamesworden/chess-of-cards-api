@@ -26,6 +26,9 @@ public class CamelCaseLambdaJsonSerializer : DefaultLambdaJsonSerializer
             // Ignore null values when serializing (cleaner JSON output)
             options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 
+            // Serialize enums as strings instead of integers (e.g., "King" instead of 11)
+            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+
             // Pretty print for debugging (can be removed in production for smaller payloads)
             // options.WriteIndented = true;
         };

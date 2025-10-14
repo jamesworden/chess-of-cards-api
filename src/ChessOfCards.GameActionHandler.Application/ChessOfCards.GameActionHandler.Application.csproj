@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ChessOfCards.Infrastructure\ChessOfCards.Infrastructure.csproj" />
     <ProjectReference Include="..\ChessOfCards.Domain\ChessOfCards.Domain.csproj" />
+    <ProjectReference Include="..\ChessOfCards.Shared.Utilities\ChessOfCards.Shared.Utilities.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MediatR" Version="12.3.0" />

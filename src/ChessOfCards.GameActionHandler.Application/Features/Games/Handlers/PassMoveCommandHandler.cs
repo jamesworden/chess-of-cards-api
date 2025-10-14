@@ -4,6 +4,7 @@ using ChessOfCards.GameActionHandler.Application.Features.Games.Commands;
 using ChessOfCards.Infrastructure.Messages;
 using ChessOfCards.Infrastructure.Repositories;
 using ChessOfCards.Infrastructure.Services;
+using ChessOfCards.Shared.Utilities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -33,7 +34,10 @@ public class PassMoveCommandHandler(
             }
 
             // Deserialize game state
-            var game = JsonSerializer.Deserialize<Game>(activeGameRecord.GameState);
+            var game = JsonSerializer.Deserialize<Game>(
+                activeGameRecord.GameState,
+                JsonOptions.Default
+            );
             if (game == null)
             {
                 _logger.LogError(
@@ -76,7 +80,7 @@ public class PassMoveCommandHandler(
             var guestSecondsElapsed = 0.0;
 
             // Update game state in repository
-            activeGameRecord.GameState = JsonSerializer.Serialize(game);
+            activeGameRecord.GameState = JsonSerializer.Serialize(game, JsonOptions.Default);
             activeGameRecord.IsHostPlayersTurn = game.IsHostPlayersTurn;
             activeGameRecord.HasEnded = game.HasEnded;
             activeGameRecord.WonBy = game.WonBy.ToString().ToUpper();

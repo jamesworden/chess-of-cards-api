@@ -20,8 +20,8 @@
     "sam:deploy:prod": "sam deploy --parameter-overrides Environment=prod",
     "sam:logs:connection": "sam logs -n ConnectionHandlerFunction --stack-name ChessOfCardsApi-Dev --tail",
     "sam:logs:game": "sam logs -n GameActionHandlerFunction --stack-name ChessOfCardsApi-Dev --tail",
-    "format": "dotnet csharpier .",
-    "format:check": "dotnet csharpier . --check"
+    "format": "dotnet csharpier format .",
+    "format:check": "dotnet csharpier check ."
   },
   "repository": {
     "type": "git",

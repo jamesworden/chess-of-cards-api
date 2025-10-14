@@ -20,7 +20,7 @@ public static class ServiceConfiguration
         {
             MaxConnectionsPerServer = 50, // Enable connection pooling for better performance
             Timeout = TimeSpan.FromSeconds(10), // Reasonable timeout for connection operations
-            MaxErrorRetry = 3 // Built-in retry logic for transient errors
+            MaxErrorRetry = 3, // Built-in retry logic for transient errors
         };
         var dynamoDbClient = new AmazonDynamoDBClient(config);
 

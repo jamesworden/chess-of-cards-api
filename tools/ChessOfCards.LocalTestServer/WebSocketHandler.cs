@@ -27,7 +27,10 @@ public class WebSocketHandler
         _localWebSocketService = localWebSocketService;
 
         // Register the local hook so Lambda functions can send messages through our local manager
-        Infrastructure.Services.LocalWebSocketHook.LocalSendMessage = async (connectionId, message) =>
+        Infrastructure.Services.LocalWebSocketHook.LocalSendMessage = async (
+            connectionId,
+            message
+        ) =>
         {
             _logger.LogInformation($"[LOCAL HOOK] Sending message to {connectionId}");
             return await _localWebSocketService.SendMessageAsync(connectionId, message);

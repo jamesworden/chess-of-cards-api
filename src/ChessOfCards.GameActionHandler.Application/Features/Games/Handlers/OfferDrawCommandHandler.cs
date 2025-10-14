@@ -4,6 +4,7 @@ using ChessOfCards.GameActionHandler.Application.Features.Games.Commands;
 using ChessOfCards.Infrastructure.Messages;
 using ChessOfCards.Infrastructure.Repositories;
 using ChessOfCards.Infrastructure.Services;
+using ChessOfCards.Shared.Utilities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -33,7 +34,10 @@ public class OfferDrawCommandHandler(
             }
 
             // Deserialize game state
-            var game = JsonSerializer.Deserialize<Game>(activeGameRecord.GameState);
+            var game = JsonSerializer.Deserialize<Game>(
+                activeGameRecord.GameState,
+                JsonOptions.Default
+            );
             if (game == null)
             {
                 _logger.LogError(
@@ -53,7 +57,7 @@ public class OfferDrawCommandHandler(
             }
 
             // Update game state in repository
-            activeGameRecord.GameState = JsonSerializer.Serialize(game);
+            activeGameRecord.GameState = JsonSerializer.Serialize(game, JsonOptions.Default);
             await _activeGameRepository.UpdateAsync(activeGameRecord);
 
             // Determine opponent and send draw offer message

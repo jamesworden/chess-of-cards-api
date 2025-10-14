@@ -17,7 +17,8 @@ namespace ChessOfCards.GameActionHandler;
 public class Function
 {
     // Static initialization - reused across Lambda invocations (container reuse)
-    private static readonly IServiceProvider ServiceProvider = ServiceConfiguration.ConfigureServices();
+    private static readonly IServiceProvider ServiceProvider =
+        ServiceConfiguration.ConfigureServices();
     private static readonly ActionDispatcher ActionDispatcher = InitializeDispatcher();
 
     private static ActionDispatcher InitializeDispatcher()
