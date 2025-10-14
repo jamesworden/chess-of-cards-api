@@ -300,7 +300,10 @@ Default deployment region is `us-east-1` (N. Virginia). All resources are deploy
 
 ## Related Documentation
 
-- **PROJECT_STATUS.md** - Detailed project roadmap and current progress
-- **SERVERLESS_ARCHITECTURE.md** - Architecture design document
-- **DEPLOYMENT.md** - Deployment guide
-- **README.md** - Project overview
+- **[docs/QUICK_START.md](docs/QUICK_START.md)** - Quick start guide for developers
+- **[docs/LOCAL_TESTING.md](docs/LOCAL_TESTING.md)** - Local development and testing
+- **[docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)** - Detailed project roadmap and current progress
+- **[docs/SERVERLESS_ARCHITECTURE.md](docs/SERVERLESS_ARCHITECTURE.md)** - Architecture design document
+- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Deployment guide
+- **[docs/BEST_PRACTICES_TODO.md](docs/BEST_PRACTICES_TODO.md)** - AWS best practices checklist
+- **[README.md](README.md)** - Project overview

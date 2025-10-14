@@ -199,7 +199,7 @@ The project uses GitHub Actions for automated deployment:
 - Comprehensive unit and integration tests
 - Authentication with AWS Cognito (optional)
 
-See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed roadmap.
+See [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for detailed roadmap.
 
 ## Configuration
 
@@ -249,6 +249,15 @@ To delete the deployed stack:
 sam delete --stack-name ChessOfCardsApi-Dev
 sam delete --stack-name ChessOfCardsApi-Prod
 ```
+
+## Documentation
+
+- **[Quick Start Guide](docs/QUICK_START.md)** - Get started in 3 steps
+- **[Local Testing](docs/LOCAL_TESTING.md)** - Run the server locally
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Deploy to AWS
+- **[Architecture](docs/SERVERLESS_ARCHITECTURE.md)** - System design
+- **[Project Status](docs/PROJECT_STATUS.md)** - Roadmap and progress
+- **[Best Practices](docs/BEST_PRACTICES_TODO.md)** - Optimization checklist
 
 ## Resources
 

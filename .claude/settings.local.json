@@ -21,7 +21,13 @@
       "Bash(docker:*)",
       "Bash(aws cloudformation describe-stacks:*)",
       "WebSearch",
-      "WebFetch(domain:aws.amazon.com)"
+      "WebFetch(domain:aws.amazon.com)",
+      "Bash(git mv:*)",
+      "Bash(robocopy:*)",
+      "Bash(xcopy:*)",
+      "Bash(git add:*)",
+      "Bash(test:*)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

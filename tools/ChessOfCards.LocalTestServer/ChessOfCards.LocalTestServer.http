@@ -1,0 +1,6 @@
+@ChessOfCards.LocalTestServer_HostAddress = http://localhost:5007
+
+GET {{ChessOfCards.LocalTestServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

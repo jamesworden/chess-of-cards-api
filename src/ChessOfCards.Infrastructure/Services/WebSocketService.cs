@@ -9,6 +9,14 @@ using Amazon.Runtime;
 namespace ChessOfCards.Infrastructure.Services;
 
 /// <summary>
+/// Static hook for local testing to intercept WebSocket message sends.
+/// </summary>
+public static class LocalWebSocketHook
+{
+    public static Func<string, object, Task<bool>>? LocalSendMessage { get; set; }
+}
+
+/// <summary>
 /// Service for managing WebSocket connections and sending messages
 /// </summary>
 public class WebSocketService
@@ -23,10 +31,24 @@ public class WebSocketService
 
     public WebSocketService(string websocketEndpoint)
     {
-        var serviceUrl = websocketEndpoint.Replace("wss://", "https://");
-        _apiClient = new AmazonApiGatewayManagementApiClient(
-            new AmazonApiGatewayManagementApiConfig { ServiceURL = serviceUrl }
-        );
+        // Check if we're in local testing mode
+        var isLocalMode =
+            websocketEndpoint.Contains("localhost")
+            || websocketEndpoint.Contains("127.0.0.1");
+
+        if (isLocalMode)
+        {
+            // In local mode, we'll use a dummy client since the LocalWebSocketServiceAdapter
+            // will override the SendMessageAsync method
+            _apiClient = null!;
+        }
+        else
+        {
+            var serviceUrl = websocketEndpoint.Replace("wss://", "https://");
+            _apiClient = new AmazonApiGatewayManagementApiClient(
+                new AmazonApiGatewayManagementApiConfig { ServiceURL = serviceUrl }
+            );
+        }
     }
 
     /// <summary>
@@ -34,6 +56,23 @@ public class WebSocketService
     /// </summary>
     public virtual async Task<bool> SendMessageAsync(string connectionId, object message)
     {
+        // Check if there's a local hook registered (for local testing)
+        if (LocalWebSocketHook.LocalSendMessage != null)
+        {
+            Console.WriteLine($"[LOCAL] Using local WebSocket hook for {connectionId}");
+            return await LocalWebSocketHook.LocalSendMessage(connectionId, message);
+        }
+
+        // Check if we're in local testing mode
+        var isLocalTesting = Environment.GetEnvironmentVariable("IS_LOCAL_TESTING") == "true";
+        if (isLocalTesting && _apiClient == null)
+        {
+            // In local mode, messages are handled by the local test server
+            // The LocalWebSocketServiceAdapter will handle the actual sending
+            Console.WriteLine($"[LOCAL] Message would be sent to {connectionId}: {JsonSerializer.Serialize(message, JsonOptions)}");
+            return true;
+        }
+
         try
         {
             var json = JsonSerializer.Serialize(message, JsonOptions);

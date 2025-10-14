@@ -11,7 +11,9 @@ public class CreatePendingGameRequestValidator : AbstractValidator<CreatePending
         RuleFor(x => x.DurationOption)
             .Must(BeValidDurationOption)
             .When(x => !string.IsNullOrWhiteSpace(x.DurationOption))
-            .WithMessage($"DurationOption must be one of: {string.Join(", ", DurationOptionConstants.ValidOptions)}");
+            .WithMessage(
+                $"DurationOption must be one of: {string.Join(", ", DurationOptionConstants.ValidOptions)}"
+            );
 
         RuleFor(x => x.HostName)
             .MaximumLength(50)
@@ -24,6 +26,9 @@ public class CreatePendingGameRequestValidator : AbstractValidator<CreatePending
         if (string.IsNullOrWhiteSpace(durationOption))
             return true;
 
-        return DurationOptionConstants.ValidOptions.Contains(durationOption, StringComparer.OrdinalIgnoreCase);
+        return DurationOptionConstants.ValidOptions.Contains(
+            durationOption,
+            StringComparer.OrdinalIgnoreCase
+        );
     }
 }

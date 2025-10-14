@@ -1,0 +1,166 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Local Test Server",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/run-local-server.ps1",
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}/scripts/run-local-server.ps1"
+        ]
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "isBackground": true,
+      "icon": {
+        "id": "server",
+        "color": "terminal.ansiCyan"
+      }
+    },
+    {
+      "label": "Run Local Test Server (Rebuild First)",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/run-local-server.ps1",
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}/scripts/run-local-server.ps1",
+          "-Rebuild"
+        ]
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "isBackground": true,
+      "icon": {
+        "id": "tools",
+        "color": "terminal.ansiGreen"
+      }
+    },
+    {
+      "label": "Build Solution",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["build", "ChessOfCards.sln"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": "$msCompile",
+      "icon": {
+        "id": "tools",
+        "color": "terminal.ansiYellow"
+      }
+    },
+    {
+      "label": "Clean Solution",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["clean", "ChessOfCards.sln"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "icon": {
+        "id": "trash",
+        "color": "terminal.ansiRed"
+      }
+    },
+    {
+      "label": "Run Tests",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["test", "ChessOfCards.sln"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": "$msCompile",
+      "icon": {
+        "id": "beaker",
+        "color": "terminal.ansiMagenta"
+      }
+    },
+    {
+      "label": "SAM Build",
+      "type": "shell",
+      "command": "sam",
+      "args": ["build"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "icon": {
+        "id": "package",
+        "color": "terminal.ansiBlue"
+      }
+    },
+    {
+      "label": "SAM Local Start API",
+      "type": "shell",
+      "command": "sam",
+      "args": ["local", "start-api"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "icon": {
+        "id": "globe",
+        "color": "terminal.ansiCyan"
+      }
+    },
+    {
+      "label": "SAM Deploy (Dev)",
+      "type": "shell",
+      "command": "sam",
+      "args": ["deploy", "--parameter-overrides", "Environment=dev"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "icon": {
+        "id": "cloud-upload",
+        "color": "terminal.ansiGreen"
+      }
+    }
+  ]
+}
