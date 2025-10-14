@@ -10,6 +10,13 @@ public class CardMovement
 
     public string? Notation { get; set; }
 
+    // Parameterless constructor for JSON deserialization
+    public CardMovement()
+    {
+        From = new CardStore();
+        To = new CardStore();
+    }
+
     public CardMovement(CardStore from, CardStore to, Card? card)
     {
         From = from;

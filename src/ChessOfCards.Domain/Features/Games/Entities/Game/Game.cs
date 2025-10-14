@@ -4,57 +4,57 @@ namespace ChessOfCards.Domain.Features.Games;
 
 public class Game
 {
-    public PlayerOrNone WonBy { get; private set; } = PlayerOrNone.None;
+    public PlayerOrNone WonBy { get; set; } = PlayerOrNone.None;
 
-    public bool IsHostPlayersTurn { get; private set; } = true;
+    public bool IsHostPlayersTurn { get; set; } = true;
 
-    public string HostConnectionId { get; private set; }
+    public string HostConnectionId { get; set; }
 
-    public string GuestConnectionId { get; private set; }
+    public string GuestConnectionId { get; set; }
 
-    public string GameCode { get; private set; }
+    public string GameCode { get; set; }
 
-    private Lane[] Lanes = [];
+    public Lane[] Lanes { get; set; } = [];
 
-    private Player HostPlayer { get; set; }
+    public Player HostPlayer { get; set; }
 
-    private Player GuestPlayer { get; set; }
+    public Player GuestPlayer { get; set; }
 
-    private int? RedJokerLaneIndex { get; set; }
+    public int? RedJokerLaneIndex { get; set; }
 
-    private int? BlackJokerLaneIndex { get; set; }
+    public int? BlackJokerLaneIndex { get; set; }
 
-    private DateTime GameCreatedTimestampUTC { get; set; }
+    public DateTime GameCreatedTimestampUTC { get; set; }
 
-    private readonly List<MoveMade> MovesMade = [];
+    public List<MoveMade> MovesMade { get; set; } = [];
 
-    public DurationOption DurationOption { get; private set; }
+    public DurationOption DurationOption { get; set; }
 
-    private DateTime? GameEndedTimestampUTC { get; set; }
+    public DateTime? GameEndedTimestampUTC { get; set; }
 
-    private List<List<CandidateMove>> CandidateMoves { get; set; } = [];
+    public List<List<CandidateMove>> CandidateMoves { get; set; } = [];
 
-    public bool HasEnded { get; private set; } = false;
+    public bool HasEnded { get; set; } = false;
 
-    private List<ChatMessage> ChatMessages { get; set; } = [];
+    public List<ChatMessage> ChatMessages { get; set; } = [];
 
-    private List<ChatMessageView> ChatMessageViews { get; set; } = [];
+    public List<ChatMessageView> ChatMessageViews { get; set; } = [];
 
-    private string? HostName { get; set; }
+    public string? HostName { get; set; }
 
-    private string? GuestName { get; set; }
+    public string? GuestName { get; set; }
 
-    public DateTime? HostPlayerDisconnectedTimestampUTC { get; private set; } = null;
+    public DateTime? HostPlayerDisconnectedTimestampUTC { get; set; } = null;
 
-    public DateTime? GuestPlayerDisconnectedTimestampUTC { get; private set; } = null;
+    public DateTime? GuestPlayerDisconnectedTimestampUTC { get; set; } = null;
 
-    private bool DrawOfferFromHost = false;
+    public bool DrawOfferFromHost { get; set; } = false;
 
-    private bool DrawOfferFromGuest = false;
+    public bool DrawOfferFromGuest { get; set; } = false;
 
-    private int? HostsLatestReadChatMessageIndex = null;
+    public int? HostsLatestReadChatMessageIndex { get; set; } = null;
 
-    private int? GuestsLatestReadChatMessageIndex = null;
+    public int? GuestsLatestReadChatMessageIndex { get; set; } = null;
 
     // Parameterless constructor for JSON deserialization
     public Game()
