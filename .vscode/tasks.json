@@ -161,6 +161,33 @@
         "id": "cloud-upload",
         "color": "terminal.ansiGreen"
       }
+    },
+    {
+      "label": "build",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/tools/ChessOfCards.LocalTestServer/ChessOfCards.LocalTestServer.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "watch",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/tools/ChessOfCards.LocalTestServer/ChessOfCards.LocalTestServer.csproj"
+      ],
+      "problemMatcher": "$msCompile",
+      "isBackground": true,
+      "group": "build"
     }
   ]
 }

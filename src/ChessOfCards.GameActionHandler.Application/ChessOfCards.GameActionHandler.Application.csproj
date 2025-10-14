@@ -4,6 +4,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <EmbedAllSources>true</EmbedAllSources>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChessOfCards.Infrastructure\ChessOfCards.Infrastructure.csproj" />
     <ProjectReference Include="..\ChessOfCards.Domain\ChessOfCards.Domain.csproj" />

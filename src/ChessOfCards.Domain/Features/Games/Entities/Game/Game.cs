@@ -56,6 +56,16 @@ public class Game
 
     private int? GuestsLatestReadChatMessageIndex = null;
 
+    // Parameterless constructor for JSON deserialization
+    public Game()
+    {
+        HostConnectionId = string.Empty;
+        GuestConnectionId = string.Empty;
+        GameCode = string.Empty;
+        HostPlayer = new Player(new Deck(), new Hand([]));
+        GuestPlayer = new Player(new Deck(), new Hand([]));
+    }
+
     public Game(
         string hostConnectionId,
         string guestConnectionId,

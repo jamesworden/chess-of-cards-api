@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ChessOfCards.GameActionHandler.Application.Features.Games.Commands;
 using ChessOfCards.Infrastructure.Messages;
 using ChessOfCards.Infrastructure.Models;
@@ -86,10 +87,7 @@ public class JoinGameCommandHandler(
             );
 
             // Serialize game state to JSON
-            var gameStateJson = System.Text.Json.JsonSerializer.Serialize(
-                game,
-                JsonOptions.Default
-            );
+            var gameStateJson = JsonSerializer.Serialize(game, JsonOptions.Default);
 
             // Create active game record
             var activeGame = new ActiveGameRecord(

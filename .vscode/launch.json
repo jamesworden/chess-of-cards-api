@@ -1,0 +1,61 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Local Test Server",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/tools/ChessOfCards.LocalTestServer/bin/Debug/net8.0/ChessOfCards.LocalTestServer.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "enableStepFiltering": false,
+      "requireExactSource": false,
+      "symbolOptions": {
+        "searchPaths": [
+          "${workspaceFolder}/src/ChessOfCards.GameActionHandler.Application/bin/Debug/net8.0",
+          "${workspaceFolder}/tools/ChessOfCards.LocalTestServer/bin/Debug/net8.0"
+        ],
+        "searchMicrosoftSymbolServer": false,
+        "searchNuGetOrgSymbolServer": false
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "Debug Local Test Server (Watch)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "watch",
+      "program": "${workspaceFolder}/tools/ChessOfCards.LocalTestServer/bin/Debug/net8.0/ChessOfCards.LocalTestServer.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "enableStepFiltering": false,
+      "requireExactSource": false,
+      "symbolOptions": {
+        "searchPaths": [
+          "${workspaceFolder}/src/ChessOfCards.GameActionHandler.Application/bin/Debug/net8.0",
+          "${workspaceFolder}/tools/ChessOfCards.LocalTestServer/bin/Debug/net8.0"
+        ],
+        "searchMicrosoftSymbolServer": false,
+        "searchNuGetOrgSymbolServer": false
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "Attach to Local Test Server",
+      "type": "coreclr",
+      "request": "attach",
+      "processName": "ChessOfCards.LocalTestServer"
+    }
+  ]
+}

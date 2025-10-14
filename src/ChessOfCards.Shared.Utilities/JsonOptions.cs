@@ -15,6 +15,7 @@ public static class JsonOptions
     /// - Enums are serialized as strings (e.g., "king" instead of 11)
     /// - Null values are ignored
     /// - Property names are case-insensitive when deserializing
+    /// - Fields are included in serialization (required for domain models with private fields)
     /// </summary>
     public static readonly JsonSerializerOptions Default = new()
     {
@@ -22,6 +23,7 @@ public static class JsonOptions
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+        IncludeFields = true,
     };
 
     /// <summary>
@@ -34,5 +36,6 @@ public static class JsonOptions
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         WriteIndented = true,
+        IncludeFields = true,
     };
 }

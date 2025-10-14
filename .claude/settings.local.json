@@ -27,7 +27,8 @@
       "Bash(xcopy:*)",
       "Bash(git add:*)",
       "Bash(test:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []
