@@ -1,18 +1,28 @@
 # Quick Start Guide
 
-## 🚀 Running Locally (3 Options)
+## 🚀 Running Locally (4 Options)
 
-### Option 1: VS Code Task (Easiest!)
-1. Press **`Ctrl+Shift+P`** (Windows/Linux) or **`Cmd+Shift+P`** (Mac)
-2. Type **"Run Task"**
-3. Select **"Run Local Test Server"**
+### Option 1: npm Scripts (Easiest!)
+```bash
+npm start                 # Start server on port 5000
+npm run start:watch       # Auto-reload on changes
+npm run start:rebuild     # Rebuild first, then start
+npm run start:8080        # Start on port 8080
+```
 
 ✅ Server starts on `http://localhost:5000`
 ✅ WebSocket endpoint: `ws://localhost:5000/ws`
 
 ---
 
-### Option 2: PowerShell Script
+### Option 2: VS Code Task
+1. Press **`Ctrl+Shift+P`** (Windows/Linux) or **`Cmd+Shift+P`** (Mac)
+2. Type **"Run Task"**
+3. Select **"Run Local Test Server"**
+
+---
+
+### Option 3: PowerShell Script
 ```powershell
 .\scripts\run-local-server.ps1
 ```
@@ -26,7 +36,7 @@
 
 ---
 
-### Option 3: Manual
+### Option 4: Manual
 ```bash
 cd tools/ChessOfCards.LocalTestServer
 dotnet run
@@ -49,8 +59,21 @@ wscat -c ws://localhost:5000/ws
 
 ---
 
-## 🔨 Other Useful VS Code Tasks
+## 🔨 Other Useful Commands
 
+### npm Scripts
+```bash
+npm run build              # Build .NET solution
+npm run test               # Run all tests
+npm run test:watch         # Run tests in watch mode
+npm run build:sam          # Build SAM packages
+npm run sam:local          # Start SAM local API
+npm run sam:deploy:dev     # Deploy to dev
+npm run sam:deploy:prod    # Deploy to prod
+npm run format             # Format code with CSharpier
+```
+
+### VS Code Tasks
 Press **`Ctrl+Shift+P`** → **"Run Task"** → Select:
 
 - **Build Solution** - `dotnet build ChessOfCards.sln`
@@ -101,14 +124,15 @@ dotnet build ChessOfCards.sln
 
 ## 🎯 Quick Commands Reference
 
-| Command | Description |
-|---------|-------------|
-| `.\scripts\run-local-server.ps1` | Start local server |
-| `dotnet build` | Build solution |
-| `dotnet test` | Run all tests |
-| `sam build` | Build Lambda packages |
-| `sam local start-api` | Start SAM local |
-| `sam deploy` | Deploy to AWS |
+| npm Script | Description |
+|-----------|-------------|
+| `npm start` | Start local server |
+| `npm run start:watch` | Start with auto-reload |
+| `npm run build` | Build solution |
+| `npm test` | Run all tests |
+| `npm run build:sam` | Build Lambda packages |
+| `npm run sam:local` | Start SAM local |
+| `npm run sam:deploy:dev` | Deploy to dev |
 
 ---
 

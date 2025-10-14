@@ -34,28 +34,54 @@ This project implements a real-time multiplayer card game server using AWS serve
 
 ## Getting Started
 
+### Quick Start
+
+```bash
+# Install dependencies (one time)
+npm install
+
+# Start local server
+npm start
+
+# Or start with auto-reload
+npm run start:watch
+```
+
+Server will be available at `http://localhost:5000` (WebSocket: `ws://localhost:5000/ws`)
+
 ### Build the Application
 
 ```bash
-# Build with SAM (recommended for deployment)
+# Build .NET solution
+npm run build
+# or
+dotnet build ChessOfCards.sln
+
+# Build SAM packages
+npm run build:sam
+# or
 sam build
 
-# Build with SAM using Docker (for Lambda compatibility)
+# Build with Docker (for Lambda compatibility)
+npm run build:sam:container
+# or
 sam build --use-container --mount-with WRITE
-
-# Build solution directly with .NET CLI
-dotnet build ChessOfCards.sln
 ```
 
 ### Local Development
 
 ```bash
-# Start WebSocket API locally on port 3001
+# Option 1: Custom local server (fastest)
+npm start
+
+# Option 2: SAM local API
+npm run sam:local
+# or
 sam local start-api
 
-# Test with wscat (WebSocket client)
+# Test with wscat
 npm install -g wscat
-wscat -c ws://localhost:3001
+wscat -c ws://localhost:5000
 
 # Send a test message
 {"action": "createPendingGame", "playerName": "Alice"}
@@ -67,11 +93,14 @@ wscat -c ws://localhost:3001
 # First time deployment (guided)
 sam deploy --guided
 
-# Subsequent deployments
-sam deploy
-
-# Deploy to specific environment
+# Deploy to dev
+npm run sam:deploy:dev
+# or
 sam deploy --parameter-overrides Environment=dev
+
+# Deploy to prod
+npm run sam:deploy:prod
+# or
 sam deploy --parameter-overrides Environment=prod
 ```
 
@@ -79,16 +108,27 @@ sam deploy --parameter-overrides Environment=prod
 
 ```bash
 # Tail logs for ConnectionHandler
+npm run sam:logs:connection
+# or
 sam logs -n ConnectionHandlerFunction --stack-name ChessOfCardsApi-Dev --tail
 
 # Tail logs for GameActionHandler
+npm run sam:logs:game
+# or
 sam logs -n GameActionHandlerFunction --stack-name ChessOfCardsApi-Dev --tail
 ```
 
-### Validate Template
+### Other Commands
 
 ```bash
-sam validate --lint
+# Run tests
+npm test
+
+# Validate SAM template
+npm run sam:validate
+
+# Format code
+npm run format
 ```
 
 ## Project Structure

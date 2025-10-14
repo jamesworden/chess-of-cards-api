@@ -1,0 +1,48 @@
+{
+  "name": "chess-of-cards-api",
+  "version": "1.0.0",
+  "description": "Serverless WebSocket-based multiplayer game server for Chess of Cards",
+  "scripts": {
+    "start": "powershell -ExecutionPolicy Bypass -File ./scripts/run-local-server.ps1",
+    "start:watch": "powershell -ExecutionPolicy Bypass -File ./scripts/run-local-server.ps1 -Watch",
+    "start:rebuild": "powershell -ExecutionPolicy Bypass -File ./scripts/run-local-server.ps1 -Rebuild",
+    "start:8080": "powershell -ExecutionPolicy Bypass -File ./scripts/run-local-server.ps1 -Port 8080",
+    "build": "dotnet build ChessOfCards.sln",
+    "build:sam": "sam build",
+    "build:sam:container": "sam build --use-container --mount-with WRITE",
+    "clean": "dotnet clean ChessOfCards.sln",
+    "test": "dotnet test ChessOfCards.sln",
+    "test:watch": "dotnet watch test ChessOfCards.sln",
+    "sam:local": "sam local start-api",
+    "sam:validate": "sam validate --lint",
+    "sam:deploy": "sam deploy",
+    "sam:deploy:dev": "sam deploy --parameter-overrides Environment=dev",
+    "sam:deploy:prod": "sam deploy --parameter-overrides Environment=prod",
+    "sam:logs:connection": "sam logs -n ConnectionHandlerFunction --stack-name ChessOfCardsApi-Dev --tail",
+    "sam:logs:game": "sam logs -n GameActionHandlerFunction --stack-name ChessOfCardsApi-Dev --tail",
+    "format": "dotnet csharpier .",
+    "format:check": "dotnet csharpier . --check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/chess-of-cards-api.git"
+  },
+  "keywords": [
+    "serverless",
+    "websocket",
+    "aws",
+    "lambda",
+    "dynamodb",
+    "game-server",
+    "chess-of-cards"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "wscat": "^5.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

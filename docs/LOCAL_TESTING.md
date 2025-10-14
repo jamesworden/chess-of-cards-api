@@ -22,12 +22,20 @@ The `ChessOfCards.LocalTestServer` project provides a local WebSocket server tha
 
 ### 2. Start the Server
 
-**Option A: Using VS Code Task (easiest)**
+**Option A: Using npm (easiest)**
+```bash
+npm start                 # Start on default port (5000)
+npm run start:watch       # Start with auto-reload
+npm run start:rebuild     # Rebuild first, then start
+npm run start:8080        # Start on port 8080
+```
+
+**Option B: Using VS Code Task**
 1. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
 2. Type "Run Task"
 3. Select "Run Local Test Server"
 
-**Option B: Using PowerShell script**
+**Option C: Using PowerShell script**
 ```powershell
 # From project root
 .\scripts\run-local-server.ps1
@@ -42,13 +50,13 @@ The `ChessOfCards.LocalTestServer` project provides a local WebSocket server tha
 .\scripts\run-local-server.ps1 -Watch
 ```
 
-**Option C: Using dotnet CLI**
+**Option D: Using dotnet CLI**
 ```bash
 cd tools/ChessOfCards.LocalTestServer
 dotnet run
 ```
 
-**Option D: Using dotnet watch (auto-reload on changes)**
+**Option E: Using dotnet watch (auto-reload on changes)**
 ```bash
 cd tools/ChessOfCards.LocalTestServer
 dotnet watch run
@@ -266,10 +274,10 @@ Available tasks:
 
 ## Next Steps
 
-- Start the server: Press `Ctrl+Shift+P` → "Run Task" → "Run Local Test Server"
-- Or use PowerShell: `.\scripts\run-local-server.ps1`
+- Start the server: `npm start` (or `npm run start:watch` for auto-reload)
+- Alternative: Press `Ctrl+Shift+P` → "Run Task" → "Run Local Test Server"
 - Point your Angular app to `http://localhost:5000` (default port)
 - Make changes and test immediately!
-- Deploy to dev when ready: `sam build --use-container && sam deploy`
+- Deploy to dev when ready: `npm run build:sam:container && npm run sam:deploy:dev`
 
 For more details, see `tools/ChessOfCards.LocalTestServer/README.md`
